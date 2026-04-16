@@ -1,0 +1,29 @@
+The below code should be created as a custom related list within Deal detail page . So, it takes the Deal record ID and use it to filter the analytciss of the present deal.
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Zoho Analytics Report</title>
+    <script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbededAppSDK.min.js"></script>
+
+</head>
+<body>
+    <div id = "related-list"> Loading </div>
+    <script>
+        ZOHO.embeddedApp.on("PageLoad", function(data){
+            const recordId = data.EntityId; // current CRM record ID
+            const analyticsBaseUrl = "https://analytics.zoho.eu/open-view/297022000000321878?";
+            const filter = "ZOHO_CRITERIA=AccountID='" + recordId + "'";
+            const source = analyticsBaseUrl + filter;
+            // const source = analyticsBaseUrl;
+            const dd = '<iframe frameborder=0 width="1550" height="480" src="' + source + '"> HI </iframe>';
+            document.getElementById("related-list").innerHTML = dd;
+        });
+        ZOHO.embeddedApp.init();
+    </script>
+</body>
+</html>
