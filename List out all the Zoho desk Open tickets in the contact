@@ -1,0 +1,192 @@
+This will be configured as a custom related list of the deal detail page , to see all the tickets.
+
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Open Desk Tickets</title>
+    <script src="https://live.zwidgets.com/js-sdk/1.5/ZohoEmbededAppSDK.min.js"></script>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            margin: 0;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        h3 {
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f7fa;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 1px solid #e1e5eb;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+
+        tr:hover {
+            background-color: #f0f6ff;
+        }
+
+        td {
+            color: #444;
+            border-bottom: 1px solid #eaeef3;
+        }
+
+        td a {
+            color: #0073e6;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        td a:hover {
+            text-decoration: underline;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #fff;
+            background: #0073e6;
+        }
+
+        .priority-high {
+            color: #d93025;
+            font-weight: 600;
+        }
+
+        .priority-medium {
+            color: #f9a825;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            color: #188038;
+            font-weight: 600;
+        }
+
+        .empty {
+            background: #fff;
+            border: 1px dashed #ccc;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <h3>Open Zoho Desk Tickets</h3>
+    <div id="tickets">Loading...</div>
+
+    <script>
+        // Initialize Zoho CRM Widget SDK
+        ZOHO.embeddedApp.on("PageLoad", async function (data) {
+
+            const pageData = {
+                Entity: data.Entity,
+                EntityId: data.EntityId,
+                related_list: {
+                    associated_feature_resource: {
+                        name: data.related_list.associated_feature_resource.name,
+                        api_name: data.related_list.associated_feature_resource.api_name,
+                        id: data.related_list.associated_feature_resource.id
+                    },
+                    associated_feature_type: data.related_list.associated_feature_type,
+                    id: data.related_list.id,
+                    label: data.related_list.label
+                }
+            }
+
+            // get current contact details
+            const contactRes = await zrc.get(`/crm/v8/${pageData.Entity}/${pageData.EntityId}`);
+
+
+            const ZOHO_DESK_URL = "https://desk.zoho.in";
+            const contactEmail = contactRes.data && contactRes.data.data[0] && contactRes.data.data[0].Email;
+            console.log("contactEmail",contactEmail);
+
+            if (!contactEmail) {
+                document.getElementById("tickets").innerHTML = "<p>No email found for this Account.</p>";
+                return;
+            }
+
+            try {
+                // Call Zoho Desk Tickets API via ZRC
+                const deskRes = await zrc.get(`${ZOHO_DESK_URL}/api/v1/tickets`, {
+                    connection: "desssk",
+                });
+
+                console.log("deskRes",deskRes);
+
+                if (!deskRes || !deskRes.data) {
+                    throw new Error("No response from Zoho Desk");
+                }
+
+                const ab = deskRes.data;
+                const result=ab.data;
+                const tickets = result || [];
+
+                if ([tickets].length === 0) {
+                    document.getElementById("tickets").innerHTML = "<p>No open tickets found.</p>";
+                    return;
+                }
+
+                // Render table
+                let html = "<table><tr><th>ID</th><th>Subject</th><th>Status</th><th>Priority</th><th>Created</th></tr>";
+                tickets.forEach(t => {
+                    const link = `https://desk.zoho.in/support/yourportal#Cases/${t.id}`;
+                    html += `<tr>
+                        <td><a href="${link}" target="_blank">${t.ticketNumber}</a></td>
+                        <td>${t.subject}</td>
+                        <td>${t.status}</td>
+                        <td>${t.priority || '-'}</td>
+                        <td>${new Date(t.createdTime).toLocaleString()}</td>
+                    </tr>`;
+                });
+                html += "</table>";
+
+                document.getElementById("tickets").innerHTML = html;
+
+            } catch (err) {
+                console.error("Error fetching tickets:", err);
+                document.getElementById("tickets").innerHTML = "<p>Failed to load tickets.</p>";
+            }
+        });
+
+        ZOHO.embeddedApp.init();
+    </script>
+</body>
+
+</html>
