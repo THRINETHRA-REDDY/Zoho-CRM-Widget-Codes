@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script type="text/javascript" src="https://live.zwidgets.com/js-sdk/1.2/ZohoEmbededAppSDK.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --text-color: #333;
+            --label-color: #555;
+            --input-bg-focus: #fff;
+            --border-color: #ccc;
+            --primary-color: #1a73e8;
+            --primary-hover: #1557b0;
+            --font-family: 'Inter', sans-serif;
+            --border-radius: 4px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 14px;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fdfdfd;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            min-height: 100vh;
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .layout {
+            display: flex;
+            gap: 24px;
+        }
+
+        .form-section {
+            flex: 1.1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .map-section {
+            flex: 0.9;
+            background: #e5e3df;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            min-height: 500px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--label-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group label .required {
+            color: #333;
+        }
+
+        .form-group label .helper-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .form-group label .helper-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-family: var(--font-family);
+            border-radius: 2px;
+            color: #555;
+            transition: all 0.2s ease;
+            outline: none;
+            border: 1px solid #dcdcdc;
+        }
+
+        .form-control.active-input {
+            background-color: #e8f0fe;
+            border-color: #8ab4f8;
+            color: #1a73e8;
+        }
+
+        .form-control::placeholder {
+            color: #888;
+            font-style: italic;
+        }
+
+        .form-control:focus {
+            background-color: var(--input-bg-focus);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 1px var(--primary-color);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 14px;
+            padding-right: 30px;
+        }
+
+        .input-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon-wrapper .form-control {
+            padding-right: 36px;
+        }
+
+        .input-icon-wrapper .icon {
+            position: absolute;
+            right: 10px;
+            color: #888;
+            pointer-events: none;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 30px;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        /* Choices.js */
+        .choices__inner {
+            background-color: #fff;
+            border: 1px solid #dcdcdc;
+            border-radius: 2px;
+            min-height: 35px;
+            padding: 2px 8px;
+            font-size: 13px;
+        }
+
+        .choices[data-type*="select-multiple"] .choices__button,
+        .choices[data-type*="text"] .choices__button {
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
+            margin-left: 6px;
+        }
+
+        .choices__list--multiple .choices__item {
+            background-color: var(--primary-color);
+            border: 1px solid var(--primary-hover);
+            border-radius: 2px;
+            font-family: var(--font-family);
+            margin-right: 4px;
+        }
+
+        .choices[data-type*="select-multiple"]::after {
+            content: "";
+            height: 0;
+            width: 0;
+            border-style: solid;
+            border-color: #888 transparent transparent transparent;
+            border-width: 5px;
+            position: absolute;
+            right: 11px;
+            top: 50%;
+            margin-top: -2.5px;
+            pointer-events: none;
+        }
+
+        .choices[data-type*="select-multiple"].is-open::after {
+            border-color: transparent transparent #888 transparent;
+            border-width: 0 5px 5px;
+        }
+
+        .choices[data-type*="select-multiple"] .choices__inner {
+            padding-right: 30px;
+        }
+
+        /* Quill */
+        .ql-toolbar.ql-snow {
+            background-color: #f5f5f5 !important;
+            border-color: #dcdcdc !important;
+            font-family: var(--font-family) !important;
+        }
+
+        .ql-container.ql-snow {
+            border-color: #dcdcdc !important;
+            background-color: #f8f9fa !important;
+            font-family: var(--font-family) !important;
+            font-size: 14px !important;
+        }
+
+        .form-group.full-width-editor {
+            grid-column: 1 / -1;
+        }
+
+        .d-none {
+            display: none !important;
+        }
+
+        /* Plot styles */
+        .plot-box {
+            border: 1px solid #dcdcdc;
+            margin-bottom: 16px;
+            background: #fdfdfd;
+        }
+
+        .plot-header {
+            background-color: #f5f5f5;
+            padding: 8px 12px;
+            font-weight: 600;
+            font-size: 13px;
+            border-bottom: 1px solid #dcdcdc;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+
+        .plot-body {
+            padding: 16px;
+            background-color: #ebebeb;
+        }
+
+        .plot-item {
+            background-color: #fdfdfd;
+            border: 1px solid #dcdcdc;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+        }
+
+        .plot-item-grip {
+            margin-right: 12px;
+            color: #aaa;
+            cursor: grab;
+        }
+
+        .plot-item-content {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .item-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .plot-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            margin-top: 12px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+            border-radius: 2px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .btn-outline:hover {
+            background: #f0f0f0;
+        }
+
+        .yellow-alert {
+            background-color: #fae277;
+            color: #8a6d3b;
+            padding: 12px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-buttons.next-only {
+            justify-content: flex-end;
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 93%;
+            max-width: 1080px;
+            border-radius: 4px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            padding: 14px 24px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .quoted-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .quoted-table th,
+        .quoted-table td {
+            border: 1px solid #eee;
+            padding: 9px 8px;
+            text-align: left;
+        }
+
+        .quoted-table th {
+            font-weight: 600;
+            color: #555;
+            background: #f9f9f9;
+            white-space: nowrap;
+        }
+
+        .table-input {
+            width: 100%;
+            border: 1px solid transparent;
+            padding: 3px 6px;
+            font-family: var(--font-family);
+            font-size: 13px;
+            outline: none;
+            background: transparent;
+            border-radius: 2px;
+        }
+
+        .table-input:focus {
+            border-color: var(--primary-color);
+            background: #fff;
+        }
+
+        .summary-box {
+            margin-top: 20px;
+            margin-left: auto;
+            width: 300px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            font-size: 13px;
+            overflow: hidden;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            color: #333;
+            background: #fdfdfd;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .map-section {
+                min-height: 300px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+.quoted-table input[type="number"]::-webkit-inner-spin-button,
+.quoted-table input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+    </style>
+</head>
+
+<body>
+
+
+    <form class="container" id="quote-form" onsubmit="event.preventDefault(); logFormJSON();">
+
+
+
+
+
+        <!-- ===== SECTION 1: Quote Details ===== -->
+        <div id="section-1-wrapper">
+            <div class="header">
+                <h1>Quote Details</h1>
+            </div>
+
+            <div class="layout">
+                <div class="form-section">
+                    <div class="row">
+                        <div class="form-group">
+                            <label><span><span class="required">*</span> Customer</span><a href="#"
+                                    class="helper-link">Create New</a></label>
+                            <input type="text" id="customer" name="customer" class="form-control active-input"
+                                value="Select customer" placeholder="Select customer">
+                        </div>
+                        <div class="form-group">
+                            <label><span><span class="required">*</span> Site</span></label>
+                            <input type="text" id="site" name="site" class="form-control" placeholder="Select site"
+                                style="background-color:#fff;">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Quote Name <span style="font-weight:400;color:#aaa;">(Optional)</span></label>
+                            <input type="text" id="subject" name="quote_name" class="form-control"
+                                placeholder="Short description of quote" style="background-color:#fff;">
+                        </div>
+                        <div class="form-group">
+                            <label><span><span class="required">*</span> Cost Centre</span></label>
+                            <select name="main_cost_centre" class="form-control" style="background-color:#fff;">
+                                <option>Not Selected</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Primary Customer Contact</label>
+                            <input type="text" id="primary_contact" name="primary_contact" class="form-control"
+                                placeholder="Select customer contact" style="background-color:#fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Additional Customer Contact <span
+                                    style="font-weight:400;color:#aaa;">(Optional)</span></label>
+                            <input type="text" name="additional_contact" class="form-control"
+                                style="background-color:#fff;">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Site Contact</label>
+                            <input type="text" id="site_contact" name="site_contact" class="form-control"
+                                placeholder="Select site contact" style="background-color:#fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Tags</label>
+                            <select name="tags" class="form-control" id="tags-select" multiple>
+                                <option value="important">Important</option>
+                                <option value="corporate">Corporate</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+
+                        <div style="display:flex;flex-direction:row;gap:16px;align-items:flex-start;">
+                            <div class="form-group" style="flex:1;">
+                                <label>Order Number</label>
+                                <input type="text" id="quote_number" name="order_number" class="form-control"
+                                    placeholder="Enter the order number" style="background-color:#fff;">
+                            </div>
+                            <div class="form-group" style="flex:1;">
+                                <label><span><span class="required">*</span> Due Date</span></label>
+                                <div class="input-icon-wrapper">
+                                    <input type="date" id="due_date" name="due_date" class="form-control"
+                                        style="background-color:#fff;position:relative;">
+                                    <i class="fa-regular fa-calendar icon" style="z-index:1;"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div></div>
+
+                        <div class="form-group">
+                            <label>Salesperson</label>
+                            <input type="text" id="sales_person" name="salesperson" class="form-control"
+                                placeholder="Enter the Sales person" style="background-color:#fff;">
+
+                        </div>
+                        <div class="form-group">
+                            <label>Project Manager</label>
+                            <input type="text" id="project_manager" name="project_manager" class="form-control"
+                                placeholder="Enter the Project manager" style="background-color:#fff;">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Technicians</label>
+                            <select name="technicians" class="form-control" id="technicians-select" multiple>
+                                <option value="tech1">John Doe</option>
+                                <option value="tech2">Jane Smith</option>
+                                <option value="tech3">Bob Johnson</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width-editor">
+                        <label>Description</label>
+                        <div
+                            style="border:1px solid #dcdcdc;border-bottom:none;background:#fdfdfd;padding:6px;display:flex;justify-content:flex-end;border-radius:2px 2px 0 0;">
+                            <select
+                                style="border:1px solid #ddd;padding:4px 8px;font-size:12px;border-radius:2px;color:#444;outline:none;background:#fff;">
+                                <option>Insert Script</option>
+                            </select>
+                        </div>
+                        <div id="editor-container" style="height:180px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-buttons next-only">
+                <button type="button" class="btn-primary" onclick="toggleSections()">Next</button>
+            </div>
+        </div>
+
+        <!-- ===== SECTION 2: Sections ===== -->
+
+        <div id="section-2-wrapper" class="d-none">
+            <div class="header" style="margin-bottom:16px;">
+                <h1 style="margin-bottom: 20px;">Block Name: </h1>
+
+            </div>
+            <div class="row" style="align-items:flex-end;margin-bottom:24px;">
+                <div class="form-group"> <label style="font-size: 14px;">Section</label>
+                    <input type="text" id="new-section-name" class="form-control" placeholder="Enter Section Name"
+                        style="background-color:#fff;">
+                </div>
+                <div style="display:flex;align-items:flex-end;">
+                    <button type="button" class="btn-primary" onclick="addSection()">ADD</button>
+                </div>
+            </div>
+            <div id="sections-container">
+                <div class="yellow-alert" id="no-sections-alert" style="margin-bottom:24px;"> <i
+                        class="fa-solid fa-triangle-exclamation"></i> No sections have been added yet. Create one above.
+                </div>
+            </div>
+            <div class="nav-buttons"> 
+                <button type="button" class="btn-secondary" onclick="toggleSections()">Back</button> 
+                <div style="display:flex;gap:12px;">
+                    <button type="button" class="btn-primary" onclick="downloadPDF()">Generate PDF</button>
+                    <button type="submit" class="btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- ===== MODAL ===== -->
+    <div class="modal-overlay" id="quoted-items-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Quoted Items</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <table class="quoted-table">
+                    <thead>
+                        <tr>
+                            <th style="width:46px;">#</th>
+                            <th>Product Name</th>
+                            <th style="width:75px;">Qty</th>
+                            <th style="width:115px;">List Price (£)</th>
+                            <th style="width:105px;">Amount (£)</th>
+                            <th style="width:105px;">Discount (£)</th>
+                            <th style="width:90px;">Tax (£)</th>
+                            <th style="width:105px;">Total (£)</th>
+                            <th style="width:42px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-tbody"></tbody>
+                </table>
+
+                <button type="button" class="btn-outline"
+                    style="margin-top:14px;color:var(--primary-color);border-color:rgba(26,115,232,0.4);"
+                    onclick="addModalRow()">
+                    <i class="fa-solid fa-plus" style="font-size:10px;margin-right:4px;"></i> Add row
+                </button>
+
+                <div class="summary-box">
+                    <div class="summary-row"><span>Sub Total</span><span id="modal-sub-total">£ 0.00</span></div>
+                    <div class="summary-row"><span>Discount</span><span id="modal-discount">£ 0.00</span></div>
+                    <div class="summary-row"><span>Tax</span><span id="modal-tax">£ 0.00</span></div>
+                    <div class="summary-row">
+                        <span>Adjustment</span>
+                        <input type="number" id="modal-adjustment" value="0.00" step="0.01" class="table-input"
+                            style="width:70px;text-align:right;" oninput="recalcTotals()">
+                    </div>
+                    <div class="summary-row"><span>Grand Total</span><span id="modal-grand-total">£ 0.00</span></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="button" class="btn-primary" onclick="saveModal()">Save</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var quill = new Quill('#editor-container', {
+            modules: { toolbar: [['bold', 'italic', 'underline', 'strike'], [{ size: ['small', false, 'large', 'huge'] }], [{ color: [] }, { background: [] }], [{ align: [] }], [{ list: 'bullet' }, { list: 'ordered' }], [{ indent: '-1' }, { indent: '+1' }], ['link'], ['clean']] },
+            theme: 'snow'
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script>
+        const tagsChoices = new Choices(document.getElementById('tags-select'), { removeItemButton: true, placeholder: true, placeholderValue: 'Select tags...' });
+        const techChoices = new Choices(document.getElementById('technicians-select'), { removeItemButton: true, placeholder: true, placeholderValue: 'Select technicians...' });
+
+        // ─── Drag and Drop Initialization ──────────────────────────────────────────
+        function initSectionSortable() {
+            new Sortable(document.getElementById('sections-container'), {
+                animation: 150,
+                handle: '.plot-header',
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    // No immediate state sync needed for sections if we read DOM on submit
+                }
+            });
+        }
+
+        function initRecordSortable(plotId) {
+            const el = document.getElementById(`records-${plotId}`);
+            if (!el) return;
+            // Sortable for Locations (the groups)
+            new Sortable(el, {
+                animation: 150,
+                handle: '.loc-grip',
+                ghostClass: 'sortable-ghost',
+                onEnd: function () {
+                    syncLocationOrder(plotId);
+                }
+            });
+
+            // Sortable for Products within each location
+            el.querySelectorAll('.location-records').forEach(subEl => {
+                new Sortable(subEl, {
+                    animation: 150,
+                    handle: '.plot-item-grip',
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function () {
+                        syncRows(); // This will regroup everything based on DOM order
+                    }
+                });
+            });
+        }
+
+        function syncLocationOrder(plotId) {
+            const container = document.getElementById(`records-${plotId}`);
+            const newLocations = [];
+            container.querySelectorAll('.location-group').forEach(groupEl => {
+                const locName = groupEl.dataset.locationName;
+                const loc = plotDataMap[plotId].locations.find(l => l.name === locName);
+                if (loc) newLocations.push(loc);
+            });
+            plotDataMap[plotId].locations = newLocations;
+        }
+
+        document.addEventListener('DOMContentLoaded', initSectionSortable);
+
+        // ─── Navigation ────────────────────────────────────────────────────────────
+        function toggleSections() {
+            document.getElementById("section-1-wrapper").classList.toggle("d-none");
+            document.getElementById("section-2-wrapper").classList.toggle("d-none");
+        }
+        const plotDataMap = {};
+        let plotCount = 0;
+        let itemCount = 0;
+        let currentPlotId = null;
+
+        function makeTitleEditable(element, plotId) {
+            if (element.querySelector('input')) return;
+
+            const currentTitle = element.innerText;
+            element.innerHTML = `<input type="text" class="form-control" value="${currentTitle}" style="display:inline-block; width:auto; height:24px; padding:2px 4px; font-size:13px;">`;
+            const input = element.querySelector('input');
+            input.focus();
+            input.select();
+
+            const saveTitle = () => {
+                const newTitle = input.value.trim() || currentTitle;
+                plotDataMap[plotId].title = newTitle;
+                element.innerText = newTitle;
+            };
+
+            input.onblur = saveTitle;
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    input.blur();
+                } else if (e.key === 'Escape') {
+                    element.innerText = currentTitle;
+                }
+            };
+        }
+
+        function getSectionTemplate(plotId, label) {
+            return `
+        <div class="plot-box" id="${plotId}">
+            <div class="plot-header">
+                <i class="fa-solid fa-grip-vertical" style="color:#ccc;margin-right:8px;font-size:10px;"></i>
+                <span class="plot-title" ondblclick="makeTitleEditable(this, '${plotId}')" style="cursor:pointer;">${label}</span>
+                <select class="form-control" style="background-color:#fff; width:fit-content; height:28px; padding:2px 8px; font-size:12px; margin-left:auto;" onchange="handleSectionAction('${plotId}', this.value)">
+                    <option value="">Actions</option>
+                    <option value="duplicate">Duplicate</option>
+                    <option value="delete">Delete</option>
+                </select>
+            </div>
+            <div class="plot-body">
+
+                <div id="records-${plotId}"></div>
+
+                <div class="yellow-alert" id="alert-${plotId}">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    No items have been added to this section.
+                </div>
+
+                <div class="plot-footer" id="footer-${plotId}" style="display:none;">
+                    <div style="display:flex;gap:32px;color:#333;margin-left:auto;margin-right:12px;">
+                        <span>Sub Total: <span class="plot-subtotal" style="font-weight:400;margin-left:6px;color:#555;">£0.00</span></span>
+                        <span>Tax: <span class="plot-tax" style="font-weight:400;margin-left:6px;color:#555;">£0.00</span></span>
+                        <span>Total: <span class="plot-grandtotal" style="font-weight:400;margin-left:6px;color:#555;">£0.00</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        `;
+        }
+
+        function handleSectionAction(plotId, action) {
+            if (!action) return;
+
+            if (action === 'delete') {
+                if (confirm('Are you sure you want to delete this section?')) {
+                    delete plotDataMap[plotId];
+                    const el = document.getElementById(plotId);
+                    if (el) el.remove();
+                    if (Object.keys(plotDataMap).length === 0) {
+                        document.getElementById('no-sections-alert').style.display = 'block';
+                    }
+                }
+            } else if (action === 'duplicate') {
+                const source = plotDataMap[plotId];
+                const newPlotId = 'plot-' + Date.now();
+                const newTitle = source.title + ' (Copy)';
+
+                // Clone data
+                plotDataMap[newPlotId] = JSON.parse(JSON.stringify(source));
+                plotDataMap[newPlotId].title = newTitle;
+
+                // Re-generate IDs for records to avoid collisions
+                plotDataMap[newPlotId].records = plotDataMap[newPlotId].records.map(rec => ({
+                    ...rec,
+                    id: 'item-' + Math.random().toString(36).substr(2, 9)
+                }));
+
+                // Insert DOM
+                document.getElementById('sections-container').insertAdjacentHTML('beforeend', getSectionTemplate(newPlotId, newTitle));
+                renderSectionProducts(newPlotId);
+                initRecordSortable(newPlotId);
+                document.getElementById('no-sections-alert').style.display = 'none';
+            }
+
+            const sel = document.querySelector(`#${plotId} .plot-header select`);
+            if (sel) sel.value = '';
+        }
+
+        // ─── Add a new plot/section ────────────────────────────────────────────────
+        function addSection() {
+            const nameInput = document.getElementById('new-section-name');
+            plotCount++;
+            const label = nameInput.value.trim() || `Plot ${plotCount}`;
+            const plotId = `plot-${plotCount}`;
+            plotDataMap[plotId] = {
+                title: label,
+                locations: [], // Grouped by location
+                subTotal: 0,
+                discountTotal: 0,
+                taxTotal: 0,
+                adjustment: 0,
+                grandTotal: 0
+            };
+
+            document.getElementById('sections-container').insertAdjacentHTML('beforeend', getSectionTemplate(plotId, label));
+
+            nameInput.value = '';
+            document.getElementById('no-sections-alert').style.display = 'none';
+
+            // Initialize sortable for the new records container
+            initRecordSortable(plotId);
+        }
+
+        // ─── Add a cost-centre item to a plot ─────────────────────────────────────
+        function addCostCentre(plotId) {
+            const plot = document.getElementById(plotId);
+            const nameInput = plot.querySelector('.cc-name-input');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                nameInput.focus();
+                nameInput.style.borderColor = '#d9534f';
+                setTimeout(() => nameInput.style.borderColor = '', 1500);
+                return;
+            }
+
+            itemCount++;
+            const itemId = `item-${itemCount}`;
+
+            plotDataMap[plotId].records.push({
+                id: itemId,
+                productName: name,
+                qty: 1,
+                listPrice: 0,
+                amount: 0,
+                discount: 0,
+                tax: 0,
+                total: 0
+            });
+
+            nameInput.value = '';
+            renderSectionProducts(plotId);
+        }
+
+        function removeCostCentre(plotId, itemId) {
+            plotDataMap[plotId].locations.forEach(loc => {
+                loc.records = loc.records.filter(r => r.id !== itemId);
+            });
+            // Cleanup empty locations if needed
+            plotDataMap[plotId].locations = plotDataMap[plotId].locations.filter(loc => loc.records.length > 0);
+            renderSectionProducts(plotId);
+        }
+
+
+        function openModal(plotId) {
+            if (!plotDataMap[plotId]) return;
+            currentPlotId = plotId;
+            document.getElementById('modal-title').textContent =
+                `Quoted Items — ${plotDataMap[plotId].title}`;
+            renderModalRows();
+            document.getElementById('quoted-items-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('quoted-items-modal').classList.remove('active');
+            currentPlotId = null;
+        }
+
+        function renderModalRows() {
+            const tbody = document.getElementById('modal-tbody');
+            tbody.innerHTML = '';
+
+            const data = plotDataMap[currentPlotId];
+            const allRecords = [];
+            data.locations.forEach(loc => {
+                loc.records.forEach(r => {
+                    allRecords.push({ ...r, locationName: loc.name });
+                });
+            });
+
+            // If there are no records, create one
+            if (allRecords.length === 0) {
+                tbody.insertAdjacentHTML('beforeend', buildRowHtml(0, {}));
+            }
+            else {
+                allRecords.forEach((row, i) => {
+                    tbody.insertAdjacentHTML('beforeend', buildRowHtml(i, row));
+                });
+            }
+
+            document.getElementById('modal-adjustment').value =
+                data.adjustment.toFixed(2);
+
+            recalcTotals();
+        }
+
+        function buildRowHtml(index, row) {
+            const r = row || {};
+            const id = r.id || `item-${++itemCount}`;
+            const qty = Number(r.Quantity ?? r.qty ?? r.Qty ?? 1);
+            const price = r.listPrice != null ? r.listPrice.toFixed(2) : '0.00';
+            const disc = r.discount != null ? r.discount.toFixed(2) : '0.00';
+            const tax = r.tax != null ? r.tax.toFixed(2) : '0.00';
+            const amount = r.amount != null ? r.amount.toFixed(2) : (qty * parseFloat(price)).toFixed(2);
+            const total = r.total != null ? r.total.toFixed(2) : '0.00';
+            const locationName = r.locationName || 'Default';
+            return `
+        <tr class="modal-row" data-id="${id}" data-location="${locationName}">
+            <td style="text-align:center;color:#888;width:46px;">${index + 1}</td>
+            <td><input type="text"   class="table-input row-product"  value="${r.productName || ''}" placeholder="Product name" oninput="syncRows()"></td>
+            <td><input type="number" class="table-input row-qty"      value="${qty}"   min="0" step="1"    oninput="recalcRow(this.closest('tr')); syncRows()"></td>
+            <td><input type="number" class="table-input row-price"    value="${price}" min="0" step="0.01" oninput="recalcRow(this.closest('tr')); syncRows()"></td>
+            <td class="row-amount" style="color:#555;">${amount}</td>
+            <td><input type="number" class="table-input row-discount" value="${disc}"  min="0" step="0.01" oninput="recalcRow(this.closest('tr')); syncRows()"></td>
+            <td><input type="number" class="table-input row-tax"      value="${tax}"   min="0" step="0.01" oninput="recalcRow(this.closest('tr')); syncRows()"></td>
+            <td class="row-total" style="color:#333;font-weight:500;">${total}</td>
+            <td style="text-align:center;">
+                <button type="button" style="background:none;border:none;color:#d9534f;cursor:pointer;" onclick="removeModalRow(this)">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </td>
+        </tr>`;
+        }
+
+        function addModalRow() {
+            const tbody = document.getElementById('modal-tbody');
+            tbody.insertAdjacentHTML('beforeend', buildRowHtml(tbody.children.length, null));
+            const newTr = tbody.lastElementChild;
+            recalcRow(newTr);
+            syncRows();
+        }
+
+        function removeModalRow(btn) {
+            btn.closest('tr').remove();
+            document.querySelectorAll('#modal-tbody .modal-row').forEach((tr, i) => {
+                tr.cells[0].textContent = i + 1;
+            });
+            syncRows();
+            recalcTotals();
+        }
+
+        // Recalculate Amount and Total cells for a single <tr>
+        function recalcRow(tr) {
+            const qty = parseFloat(tr.querySelector('.row-qty').value) || 0;
+            const price = parseFloat(tr.querySelector('.row-price').value) || 0;
+            const discount = parseFloat(tr.querySelector('.row-discount').value) || 0;
+            const tax = parseFloat(tr.querySelector('.row-tax').value) || 0;
+            const amount = qty * price;
+            const total = (amount - discount) + tax;
+            tr.querySelector('.row-amount').textContent = amount.toFixed(2);
+            tr.querySelector('.row-total').textContent = total.toFixed(2);
+        }
+
+        // Recalculate and update the summary box
+        function recalcTotals() {
+            let subTotal = 0, disc = 0, tax = 0;
+            document.querySelectorAll('#modal-tbody .modal-row').forEach(tr => {
+                subTotal += parseFloat(tr.querySelector('.row-total').textContent) || 0; // Assuming total includes tax/disc
+                // Note: The previous logic for subTotal/tax was a bit inconsistent with ZOHO records
+                // Let's just sum up directly for simplicity in this view
+            });
+            // Re-calculating properly from row values for the summary:
+            subTotal = 0; disc = 0; tax = 0;
+            document.querySelectorAll('#modal-tbody .modal-row').forEach(tr => {
+                subTotal += parseFloat(tr.querySelector('.row-amount').textContent) || 0;
+                disc += parseFloat(tr.querySelector('.row-discount').value) || 0;
+                tax += parseFloat(tr.querySelector('.row-tax').value) || 0;
+            });
+            const adj = parseFloat(document.getElementById('modal-adjustment').value) || 0;
+            const grand = (subTotal - disc) + tax + adj;
+
+            document.getElementById('modal-sub-total').textContent = '£ ' + subTotal.toFixed(2);
+            document.getElementById('modal-discount').textContent = '£ ' + disc.toFixed(2);
+            document.getElementById('modal-tax').textContent = '£ ' + tax.toFixed(2);
+            document.getElementById('modal-grand-total').textContent = '£ ' + grand.toFixed(2);
+
+            if (currentPlotId && plotDataMap[currentPlotId]) {
+                Object.assign(plotDataMap[currentPlotId], {
+                    subTotal, discountTotal: disc,
+                    taxTotal: tax, adjustment: adj, grandTotal: grand
+                });
+            }
+        }
+
+        // Flush ALL row DOM data → plotDataMap (called on every cell change + add/remove row)
+        function syncRows() {
+            if (!currentPlotId || !plotDataMap[currentPlotId]) return;
+            const flatRecords = [];
+            document.querySelectorAll('#modal-tbody .modal-row').forEach(tr => {
+                flatRecords.push({
+                    id: tr.dataset.id,
+                    productName: tr.querySelector('.row-product').value,
+                    qty: parseFloat(tr.querySelector('.row-qty').value) || 0,
+                    listPrice: parseFloat(tr.querySelector('.row-price').value) || 0,
+                    amount: parseFloat(tr.querySelector('.row-amount').textContent) || 0,
+                    discount: parseFloat(tr.querySelector('.row-discount').value) || 0,
+                    tax: parseFloat(tr.querySelector('.row-tax').value) || 0,
+                    total: parseFloat(tr.querySelector('.row-total').textContent) || 0,
+                    // We need to keep the location mapping
+                    locationName: tr.dataset.location || "Default"
+                });
+            });
+
+            // Regroup flatRecords back into locations
+            const groups = {};
+            flatRecords.forEach(r => {
+                if (!groups[r.locationName]) groups[r.locationName] = [];
+                groups[r.locationName].push(r);
+            });
+
+            plotDataMap[currentPlotId].locations = Object.keys(groups).map(locName => ({
+                name: locName,
+                records: groups[locName]
+            }));
+
+            plotDataMap[currentPlotId].adjustment = parseFloat(document.getElementById('modal-adjustment').value) || 0;
+            recalcTotals();
+        }
+
+        function toggleLocation(btn) {
+            const group = btn.closest('.location-group');
+            const records = group.querySelector('.location-records');
+            const isHidden = records.style.display === 'none';
+            records.style.display = isHidden ? 'block' : 'none';
+            btn.classList.toggle('fa-square-plus', !isHidden);
+            btn.classList.toggle('fa-square-minus', isHidden);
+        }
+
+        function renderSectionProducts(plotId) {
+            const container = document.getElementById(`records-${plotId}`);
+            if (!container) return;
+            container.innerHTML = "";
+
+            const data = plotDataMap[plotId];
+            const locations = data.locations;
+            const alert = document.getElementById(`alert-${plotId}`);
+            const footer = document.getElementById(`footer-${plotId}`);
+
+            if (!locations || !locations.length) {
+                if (alert) alert.style.display = "flex";
+                if (footer) footer.style.display = "none";
+                return;
+            }
+
+            if (alert) alert.style.display = "none";
+            if (footer) {
+                footer.style.display = "flex";
+                footer.querySelector('.plot-subtotal').textContent = '£' + data.subTotal.toFixed(2);
+                footer.querySelector('.plot-tax').textContent = '£' + data.taxTotal.toFixed(2);
+                footer.querySelector('.plot-grandtotal').textContent = '£' + data.grandTotal.toFixed(2);
+            }
+
+            locations.forEach((loc) => {
+                const groupHtml = `
+                    <div class="location-group" data-location-name="${loc.name}" style="margin-bottom: 8px; border: 1px solid #eee; border-radius: 4px; overflow: hidden; background: #fff;">
+                        <div class="location-header" style="background: #fdfdfd; padding: 6px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #f0f0f0; cursor: default;">
+                            <i class="fa-solid fa-square-minus toggle-icon" onclick="toggleLocation(this)" style="color: #007dff; cursor: pointer; font-size: 14px;"></i>
+                            <i class="fa-solid fa-grip-vertical loc-grip" style="color: #ddd; font-size: 10px; cursor: grab;"></i>
+                            <span style="font-weight: 600; font-size: 13px; color: #555;">${loc.name}</span>
+                        </div>
+                        <div class="location-records" style="padding: 4px; background: #fafafa;">
+                            ${loc.records.map(row => `
+                                <div class="plot-item" data-id="${row.id}" data-location="${loc.name}" style="margin-bottom: 2px; background: #fff; border: 1px solid #eee;">
+                                    <i class="fa-solid fa-grip-vertical plot-item-grip" style="color: #eee; font-size: 9px; margin-left:14px; margin-right: 8px;"></i>
+                                    <div class="plot-item-content" onclick="openModal('${plotId}')">
+                                        <div class="item-left">
+                                            <input type="checkbox" onclick="event.stopPropagation()">
+                                            <span style="font-weight: 500; font-size: 12px; color: #1a73e8;">${row.productName || "Unnamed Product"}</span>
+                                        </div>
+                                        <div class="item-right">
+                                            <span style="color:#888;font-size:11px;margin-right:20px;">
+                                                £${row.total.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML("beforeend", groupHtml);
+            });
+
+            // Re-init sortable for new DOM elements
+            initRecordSortable(plotId);
+        }
+        // Save: ALWAYS sync DOM → map first, then update footer and badges
+        function saveModal() {
+            if (!currentPlotId) return;
+
+            syncRows();
+
+            const data = plotDataMap[currentPlotId];
+
+            const footer = document.getElementById(`footer-${currentPlotId}`);
+
+            if (footer) {
+                footer.querySelector('.plot-subtotal').textContent = '£' + data.subTotal.toFixed(2);
+                footer.querySelector('.plot-tax').textContent = '£' + data.taxTotal.toFixed(2);
+                footer.querySelector('.plot-grandtotal').textContent = '£' + data.grandTotal.toFixed(2);
+            }
+
+            renderSectionProducts(currentPlotId);
+
+            closeModal();
+        }
+
+        function getFormData() {
+            const fd = new FormData(document.getElementById('quote-form'));
+            const data = Object.fromEntries(fd.entries());
+            data.tags = tagsChoices.getValue(true);
+            data.technicians = techChoices.getValue(true);
+            data.description = quill.root.innerHTML;
+
+            // Read sections in DOM order
+            const sectionElements = document.querySelectorAll('#sections-container .plot-box');
+            data.sections = Array.from(sectionElements).map(el => {
+                const plotId = el.id;
+                const pd = plotDataMap[plotId];
+                return {
+                    id: plotId,
+                    title: pd.title,
+                    locationGroups: pd.locations.map(loc => ({
+                        location: loc.name,
+                        pins: loc.records
+                    })),
+                    subTotal: pd.subTotal,
+                    discount: pd.discountTotal,
+                    tax: pd.taxTotal,
+                    adjustment: pd.adjustment,
+                    grandTotal: pd.grandTotal
+                };
+            });
+            return data;
+        }
+
+        // ─── Form submit ───────────────────────────────────────────────────────────
+
+//         function logFormJSON() {
+//             const data = getFormData();
+//             console.log('=== FORM JSON ===');
+//             console.log(JSON.stringify(data, null, 2));
+//         }
+//     async function downloadPDF() {
+//     const data = getFormData();
+//     const pdfBlob = generatePDF(data);
+
+//     try {
+//         const response = await ZOHO.CRM.CONNECTION.invoke("workdrive", {
+//             method: "POST",
+//             url: "https://workdrive.zoho.eu/api/v1/upload",
+//             params: {
+//                 parent_id: "ayoyzfcd2a7f0579f4b78974bf976dbf24bab"
+//             },
+//             files: {
+//                 content: {
+//                     file: pdfBlob,
+//                     filename: "Estimate.pdf"
+//                 }
+//             }
+//         });
+
+//         console.log("UPLOAD RESPONSE:", response);
+
+//     } catch (error) {
+//         console.error("Upload Error:", error);
+//     }
+// }
+        async function downloadPDF() {
+            const data = getFormData();
+            const pdfBlob = generatePDF(data);
+
+            console.log("currentrecordid",currentrecordid);
+
+            console.log("pdfBlob",pdfBlob);
+
+
+            var as=ZOHO.CRM.API.attachFile({Entity:"Quotes",RecordID:currentrecordid,File:{Name:"Estimate.pdf",Content:pdfBlob}});
+            console.log("as",as);
+
+            // var attaid="";
+
+            function processAttachments(data) {
+    console.log("outside usage", data.data[0]);
+var fileid=data.data[0].id;
+
+
+var func_name = "widgetcalls";
+var req_data ={
+  "arguments": JSON.stringify({
+      "recid" :  currentrecordid,
+      "attid" :  fileid
+  })
+};
+ZOHO.CRM.FUNCTIONS.execute(func_name, req_data)
+.then(function(data){
+    console.log("functionrespone",data)
+})
+
+// console.log("fileid",fileid);
+
+// var conn_name = "hellokar";
+// var req_data ={
+//   "parameters" : {},
+//   "headers" : {},
+//   "method" : "GET",
+//   "url" : "https://www.zohoapis.in/crm/v8/Quotes/"+currentrecordid+"/Attachments/" + fileid,
+//   "param_type" : 1
+// };
+// ZOHO.CRM.CONNECTION.invoke(conn_name, req_data)
+// .then(function(data){
+//     console.log(data);
+
+//     responsetest = ZOHO.CRM.CONNECTION.invoke("workdrive", {
+//             method: "POST",
+//             url: "https://workdrive.zoho.in/api/v1/upload",
+//             params: {
+//                 parent_id: "naxu2cac9630022db422e9428a86c3af0e368",
+//                 content:data
+//             },
+//             files: [{"paramName":"data","content":"Estimate.pdf","stringPart":"true"}],
+//             Headers:{"Accept":"application/vnd.api+json"}
+//         }).then(function(data){
+//             console.log("fileresponse",data);
+//         });
+
+
+//         // console.log("responsetest",responsetest);
+
+// })
+
+   
+}
+
+            // var attach=ZOHO.CRM.API.getRelatedRecords({Entity:"Quotes",RecordID:currentrecordid,RelatedList:"Attachments",page:1,per_page:200});
+
+
+            ZOHO.CRM.API.getRelatedRecords({Entity:"Quotes",RecordID:currentrecordid,RelatedList:"Attachments",page:1,per_page:200})
+.then(function(data){
+    processAttachments(data)
+   
+})
+
+
+
+
+// console.log("attach",attach);
+
+
+// console.log("attaid",attaid);
+
+            
+            // Prepare payload
+            const formData = new FormData();
+            formData.append("file", pdfBlob, "Estimate.pdf");
+            // Optional: You can also send the JSON data along with it
+            formData.append("form_data", JSON.stringify(data));
+
+            console.log("=== SENDING API REQUEST PAYLOAD ===");
+            console.log("File Size:", pdfBlob.size, "bytes");
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            // ADD YOUR API ENDPOINT HERE
+                try {
+        const response = await ZOHO.CRM.CONNECTION.invoke("workdrive", {
+            method: "POST",
+            url: "https://workdrive.zoho.in/api/v1/upload",
+            parameter: {
+                parent_id: "naxu2cac9630022db422e9428a86c3af0e368",
+                content:pdfBlob
+            },
+            files: [{"paramName":"pdfBlob","content":"Estimate.pdf","stringPart":"true"}],
+            Headers:{"Accept":"application/vnd.api+json"}
+
+        });
+
+
+
+//         var conn_name = "workdrive";
+// var req_data = {
+// 	"parameters": {},
+// 	"headers": {},
+// 	"method": "POST",
+// 	"url": "https://workdrive.zoho.in/api/v1/upload?filename=adv.pdf&parent_id=naxu2cac9630022db422e9428a86c3af0e368&override-name-exist=false",
+// 	"files": pdfBlob
+// };
+// ZOHO.CRM.CONNECTION.invoke(conn_name, req_data).then(function(data){
+// 	console.log("abc",data)
+// })
+
+        // {"paramName":"filename","content":"upload.png","stringPart":"true"}
+
+        // response1 = zoho.workdrive.uploadFile(pdfBlob,"naxu2cac9630022db422e9428a86c3af0e368","Estimate.pdf",false,"workdrive")
+
+        // console.log("UPLOAD RESPONSE:", response);
+
+    } catch (error) {
+        console.error("Upload Error:", error);
+    }
+          
+        }
+
+        function drawPageHeader(doc, data, isFirstPage) {
+            let currentY = 20;
+
+            // Header Left: Drawn Logo (Vector, 100% PDF Safe)
+            doc.setFillColor(34, 34, 34);
+            doc.rect(14, currentY, 30, 14, "F");
+            
+            doc.setDrawColor(153, 153, 153);
+            doc.setLineWidth(0.6);
+            doc.rect(14.8, currentY + 0.8, 28.4, 12.4, "S");
+            
+            doc.setTextColor(153, 153, 153);
+            doc.setFontSize(23);
+            doc.setFont("helvetica", "normal");
+            doc.text("RED", 17, currentY + 10.5);
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.text("5", 37, currentY + 10.5);
+            
+            // Header Right: Company Info
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "bold");
+            doc.text("Red 05 Limited", 130, currentY + 4);
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(9);
+            const address = "Unit C, Norton Road Business Park\nNewhaven\nEast Sussex\nBN9 0FN\nTel. 01273 525525\nwww.red5.ltd";
+            doc.text(address, 130, currentY + 8);
+            
+            currentY += 45; // Increased by 10mm to create spacing between address and estimate NO
+            
+            const estNo = data.order_number || data.quote_name || "4816";
+            
+            if (isFirstPage) {
+                // Customer Info (Left)
+                const customerName = data.customer || "Customer Name";
+                doc.setFont("helvetica", "normal");
+                doc.text(`${customerName}\nFirst Floor,\nUnit 5 Ridgeway Office Park,\nBedford Road\nPetersfield\nGU32 3QF`, 14, currentY);
+                
+                // Estimate Title - Right Aligned to prevent overflowing
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(14);
+                // Page width is 210 for A4, margin right 14 -> x = 196
+                doc.text("CUSTOMER ESTIMATE NO. " + estNo, 196, currentY - 5, { align: "right" });
+                
+                // Info Box (Right) - We use autoTable to cleanly render the grey box
+                doc.autoTable({
+                    startY: currentY,
+                    margin: { left: 115, right: 14 },
+                    body: [
+                        ["Quote No:", estNo],
+                        ["Site Address:", data.site || "34 Lavant Street\nPetersfield\nHampshire\nGU12 3EH"],
+                        ["Phone:", data.primary_contact || "01234 261014"],
+                        ["Date:", data.due_date || new Date().toLocaleDateString('en-GB')],
+                        ["Valid For:", "30 Day(s)"]
+                    ],
+                    theme: 'plain',
+                    styles: { fontSize: 8, cellPadding: 2.5, fillColor: [238, 238, 238] },
+                    columnStyles: { 0: { fontStyle: "bold", cellWidth: 25 }, 1: { cellWidth: 52 } }
+                });
+                
+                return Math.max(currentY + 30, doc.lastAutoTable.finalY + 15);
+            } else {
+                // Return Estimate Title for subsequent pages - Right Aligned
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(14);
+                doc.text("CUSTOMER ESTIMATE NO. " + estNo, 196, currentY - 5, { align: "right" });
+                return currentY + 5;
+            }
+        }
+
+        function generatePDF(data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // ============== PAGE 1: COVER & TERMS ==============
+            let currentY = drawPageHeader(doc, data, true);
+            
+            // Terms & Conditions
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.text("Description", 14, currentY);
+            currentY += 6;
+            
+            doc.setFontSize(9);
+            doc.text("1. Definitions & Interpretation", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term1 = '"Red 5" means Red 05 Ltd. "Client" means the company or person to whom the accompanying quotation is addressed. "Works" means the fire stopping services described in the quotation.';
+            const splitTerm1 = doc.splitTextToSize(term1, 180);
+            doc.text(splitTerm1, 14, currentY);
+            currentY += (splitTerm1.length * 4) + 4;
+            
+            doc.setFont("helvetica", "bold");
+            doc.text("2. Basis of Quotation", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term2 = "2.1 Any purchase order or instruction from the Client shall constitute acceptance of both the quotation and these Conditions. 2.2 No other terms shall apply unless agreed in writing by a Red 5 director.";
+            const splitTerm2 = doc.splitTextToSize(term2, 180);
+            doc.text(splitTerm2, 14, currentY);
+            currentY += (splitTerm2.length * 4) + 4;
+            
+            doc.setFont("helvetica", "bold");
+            doc.text("3. Scope of Works", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term3 = "The quotation covers only the following items, undertaken strictly in accordance with the fire-strategy drawings supplied by the Client and the manufacturers' tested details:\n\n" +
+                          "1. Mastic-seal cable and pipe penetrations within ceiling voids in plots and communal areas. Any work additional to mastic seals within bin/bike stores may need to be reviewed (price currently not included, but may not be required).\n" +
+                          "2. Seal service-entry penetrations from communal areas into plots.\n" +
+                          "3. Seal SVP penetrations through ceilings by wrap and compound in concrete slab zones.\n" +
+                          "4. Seal sleeves to low-profile ducting. Ducting passing through the ceiling of top floor plots to be confirmed (price currently not included, but may not be required).\n" +
+                          "5. Install intumescent putty pads to electrical back boxes and mastic seal to radiator back boxes.\n" +
+                          "6. Record every installation (location reference, photographs, unique sticker ID) and provide a flattened PDF report on completion.\n" +
+                          "7. Deliver toolbox talks with relevant trades to coordinate installation strategy prior to first fix.\n\n" +
+                          "Cost for riser cupboard floor seals has been omitted. Please note if GRP grates are to be installed, some firestopping may be required to seal the hollowcore slab edge prior to the installation of grates.\n\n" +
+                          "Any item not expressly listed above is excluded.";
+            
+            const splitTerm3 = doc.splitTextToSize(term3, 180);
+            doc.text(splitTerm3, 14, currentY);
+            currentY += Math.max((splitTerm3.length * 4) + 6, 80); // approximate spacing
+            
+            doc.setFont("helvetica", "bold");
+            doc.text("4. Drawings, Specifications & Design Responsibility", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term4_1 = "4.1 Fire lines are as indicated on the latest issue of the fire-strategy drawings provided by the Client's site team.";
+            const splitTerm4_1 = doc.splitTextToSize(term4_1, 180);
+            doc.text(splitTerm4_1, 14, currentY);
+            currentY += (splitTerm4_1.length * 4);
+            
+            doc.text("4.2 Red 5 does not accept design responsibility. Our installations are executed strictly to the supplied fire-strategy", 14, currentY);
+            
+            // ============== PAGE 2: TERMS CONTINUED ==============
+            doc.addPage();
+            currentY = drawPageHeader(doc, data, false);
+            
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            const term4_rest = "drawings and to third-party test evidence. 4.3 Where the drawings change after acceptance of the quotation, Red 5 reserves the right to re-price affected elements.";
+            const splitTerm4_rest = doc.splitTextToSize(term4_rest, 180);
+            doc.text(splitTerm4_rest, 14, currentY);
+            currentY += (splitTerm4_rest.length * 4) + 4;
+            
+            // Term 5
+            doc.setFont("helvetica", "bold");
+            doc.text("5. Programme & Working Hours", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term5 = "5.1 Unless otherwise agreed, Works will be performed Monday–Friday 08:00 – 16:00. 5.2 Saturday working is available by prior agreement. 5.3 The Client shall ensure areas are ready, accessible and free from obstruction when Red 5 arrives. Delays and shortened/aborted visits may incur additional charges. 5.4 Site attendance is subject to a minimum order value of £500.00. Where the value of works falls below this amount, an additional fee will apply to cover attendance and associated costs.";
+            const splitTerm5 = doc.splitTextToSize(term5, 180);
+            doc.text(splitTerm5, 14, currentY);
+            currentY += (splitTerm5.length * 4) + 4;
+
+            // Term 6
+            doc.setFont("helvetica", "bold");
+            doc.text("6. Access, Facilities & Site Conditions (Client Obligations)", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term6 = "The Client shall provide at no cost to Red 5:\n\n• A safe, dry, storage area for materials and small tools near the workface.\n• 110 V or 230 V power and potable water within reasonable distance of the workface.\n• Access to suitable skips or bins for disposal of non hazardous waste generated by the Works.\n• Adequate welfare facilities.";
+            const splitTerm6 = doc.splitTextToSize(term6, 180);
+            doc.text(splitTerm6, 14, currentY);
+            currentY += (splitTerm6.length * 4) + 6;
+
+            // Term 7
+            doc.setFont("helvetica", "bold");
+            doc.text("7. Variations & Additional Costs", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term7 = "7.1 If prerequisite fire-stopping provisions (e.g. clearances, framing, or services layout) are not met by preceding trades, the Client must either rectify the issue or instruct Red 5 to employ variation systems. 7.2 Significant damage to our installations that requires extra works may incur a variation process. 7.3 Such variations will attract additional cost and/or programme impact, notified via a written Variation Quotation prior to execution.";
+            const splitTerm7 = doc.splitTextToSize(term7, 180);
+            doc.text(splitTerm7, 14, currentY);
+            currentY += (splitTerm7.length * 4) + 4;
+
+            // Term 8
+            doc.setFont("helvetica", "bold");
+            doc.text("8. Quality Assurance & Reporting", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term8 = "8.1 All materials carry current third-party certification (e.g. IFC, UL-EU, CERTIFIRE). 8.2 Installation operatives undergo regular training and operate under the BM Trada fire stopping scheme. 8.3 On completion, Red 5 will issue an installation register and photographic record.";
+            const splitTerm8 = doc.splitTextToSize(term8, 180);
+            doc.text(splitTerm8, 14, currentY);
+            currentY += (splitTerm8.length * 4) + 4;
+
+            // Term 9
+            doc.setFont("helvetica", "bold");
+            doc.text("9. Health, Safety & Environmental", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term9 = "Red 5 works in accordance with the CDM Regulations 2015, the Management of Health & Safety at Work Regulations 1999, and our ISO 45001 OH&S management system. Operatives will attend the Client's site induction and abide by site rules.";
+            const splitTerm9 = doc.splitTextToSize(term9, 180);
+            doc.text(splitTerm9, 14, currentY);
+            currentY += (splitTerm9.length * 4) + 4;
+
+            // Term 10
+            doc.setFont("helvetica", "bold");
+            doc.text("10. Payment Terms", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term10 = "10.1 Unless stated otherwise in the quotation, invoices shall be submitted monthly in arrears for Works completed on site. 10.2 Payment is due within 30 days of invoice date. 10.3 Red 5 reserves the right to charge statutory late payment interest under the Late Payment of Commercial Debts (Interest) Act 1998.";
+            const splitTerm10 = doc.splitTextToSize(term10, 180);
+            doc.text(splitTerm10, 14, currentY);
+            currentY += (splitTerm10.length * 4) + 4;
+
+            // Term 11
+            doc.setFont("helvetica", "bold");
+            doc.text("11. Limitation of Liability & Confidentiality", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term11 = "11.1 Red 5 shall not be liable for delay or non-performance caused by circumstances beyond its reasonable control. 11.2 Each party shall keep confidential all technical or commercial information received from the other and shall use such information solely for the purpose of the contract.";
+            const splitTerm11 = doc.splitTextToSize(term11, 180);
+            doc.text(splitTerm11, 14, currentY);
+            currentY += (splitTerm11.length * 4) + 4;
+
+            // Term 12
+            // Term 12
+            doc.setFont("helvetica", "bold");
+            doc.text("12. Force Majeure", 14, currentY);
+            currentY += 4;
+            doc.setFont("helvetica", "normal");
+            const term12 = "Neither party shall be liable for delay or failure to perform its obligations where such delay or failure results from events beyond its reasonable control, including but not limited to fire, flood, strike, epidemic, or governmental action.";
+            const splitTerm12 = doc.splitTextToSize(term12, 180);
+            doc.text(splitTerm12, 14, currentY);
+            currentY += (splitTerm12.length * 4) + 8;
+
+            // ======== SUMMARY TABLE ========
+            if (currentY > 230) {
+                doc.addPage();
+                currentY = drawPageHeader(doc, data, false);
+            }
+            
+            let overallSubTotal = 0;
+            let overallTax = 0;
+            let overallGrand = 0;
+            const summaryBody = [];
+            
+            data.sections.forEach(section => {
+                const blockTotal = section.grandTotal || 0;
+                overallSubTotal += (section.subTotal || 0);
+                overallTax += (section.tax || 0);
+                overallGrand += blockTotal;
+                
+                summaryBody.push([
+                    { content: section.title, styles: { fontStyle: 'bold' } },
+                    { content: `£${blockTotal.toFixed(2)}`, styles: { fontStyle: 'bold' } }
+                ]);
+            });
+            
+            doc.autoTable({
+                startY: currentY,
+                head: [[ { content: 'Summary', colSpan: 2, styles: { fillColor: [230, 230, 230], textColor: [0, 0, 0], fontStyle: 'bold' } } ]],
+                body: summaryBody,
+                theme: 'grid',
+                styles: { fontSize: 9, cellPadding: 1.5, lineColor: [200, 200, 200] },
+                columnStyles: { 0: { cellWidth: 147 }, 1: { cellWidth: 35, halign: 'right' } }
+            });
+            
+            currentY = doc.lastAutoTable.finalY + 0.5;
+            
+            doc.autoTable({
+                startY: currentY,
+                body: [
+                    [{content: 'Sub-Total ex VAT', styles: {fontStyle: 'bold', lineWidth: 0}}, {content: `£${overallSubTotal.toFixed(2)}`, styles: {lineWidth: 0.1, lineColor: [200, 200, 200]}}],
+                    [{content: 'VAT', styles: {fontStyle: 'bold', lineWidth: 0}}, {content: `£${overallTax.toFixed(2)}`, styles: {lineWidth: 0.1, lineColor: [200, 200, 200]}}],
+                    [{content: 'Total inc VAT', styles: {fontStyle: 'bold', lineWidth: 0}}, {content: `£${overallGrand.toFixed(2)}`, styles: {lineWidth: 0.1, lineColor: [200, 200, 200]}}]
+                ],
+                theme: 'plain',
+                styles: { fontSize: 9, cellPadding: 1.5, halign: 'right' },
+                columnStyles: { 0: { cellWidth: 147 }, 1: { cellWidth: 35 } }
+            });
+
+            // ============== START PAGE 3/4: TABLES ==============
+            doc.addPage();
+            currentY = drawPageHeader(doc, data, false);
+            
+            // Generate summary tables based on sections
+            data.sections.forEach(section => {
+                const blockName = section.title;
+                
+                section.locationGroups.forEach(locGroup => {
+                    const plotName = locGroup.location;
+                    const items = locGroup.pins;
+                    
+                    if (items && items.length > 0) {
+                        // Title: Block - Plot - Product (as requested)
+                        doc.setFontSize(10);
+                        doc.setFont("helvetica", "bold");
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`${blockName} - ${plotName} - Service Penetrations`, 14, currentY + 5);
+                        currentY += 8;
+                        
+                        const tableBody = items.map(p => [
+                            p.productName,
+                            p.qty ? p.qty.toString() : "1"
+                        ]);
+                        
+                        doc.autoTable({
+                            startY: currentY,
+                            head: [['Item', 'Quantity']],
+                            body: tableBody,
+                            theme: 'grid',
+                            headStyles: { fillColor: [153, 153, 153], textColor: [255, 255, 255] },
+                            styles: { fontSize: 9 },
+                            columnStyles: {
+                                0: { cellWidth: 'auto' },
+                                1: { cellWidth: 30, halign: 'center' }
+                            },
+                        });
+                        
+                        currentY = doc.lastAutoTable.finalY + 2;
+                        
+                        let subTotal = 0;
+                        let tax = 0;
+                        items.forEach(i => {
+                            subTotal += i.amount || 0;
+                            tax += i.tax || 0;
+                        });
+                        let grand = subTotal + tax;
+                        
+                        doc.autoTable({
+                            startY: currentY,
+                            body: [
+                                ['Sub-Total ex VAT', `£${subTotal.toFixed(2)}`],
+                                ['FRE', `£0.00`],
+                                ['VAT', `£${tax.toFixed(2)}`],
+                                [{content: 'Total inc VAT', styles: {fontStyle: 'bold'}}, {content: `£${grand.toFixed(2)}`, styles: {fontStyle: 'bold'}}]
+                            ],
+                            theme: 'plain',
+                            styles: { fontSize: 9, halign: 'right', cellPadding: 1 },
+                            columnStyles: {
+                                0: { cellWidth: 140 },
+                                1: { cellWidth: 30 }
+                            },
+                        });
+                        
+                        currentY = doc.lastAutoTable.finalY + 15;
+                        
+                        if (currentY > 260) {
+                            doc.addPage();
+                            currentY = drawPageHeader(doc, data, false);
+                        }
+                    }
+                });
+            });
+            
+            // ============== FINAL PAGE: HOW TO PAY ==============
+            doc.addPage();
+            currentY = drawPageHeader(doc, data, false);
+            
+            const finalEstNo = data.order_number || data.quote_name || "4816";
+            
+            // Title
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text("How To Pay", 14, currentY + 12);
+            
+            // Grey Badge
+            const badgeText = "QUOTATION NO. " + finalEstNo;
+            doc.setFillColor(153, 153, 153);
+            doc.rect(140, currentY + 5, 56, 8, "F");
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(8);
+            doc.text(badgeText, 168, currentY + 10.5, { align: "center" });
+            
+            let payY = currentY + 30;
+            doc.setTextColor(0, 0, 0);
+            
+            // --- Left Column: Direct Deposit ---
+            // Computer Icon (Vector Graphic)
+            // Monitor outer casing
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.4);
+            doc.setFillColor(245, 245, 245);
+            doc.roundedRect(9, payY - 5, 12, 8.5, 1, 1, "FD");
+            // Monitor inner screen
+            doc.setDrawColor(220, 220, 220);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(10, payY - 4, 10, 5.5, "FD");
+            // Arrow/Cursor inside screen (simple lines)
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.5);
+            doc.line(14, payY - 1, 16, payY - 3); // arrow body
+            doc.line(16, payY - 3, 16, payY - 2.2); // arrowhead top
+            doc.line(16, payY - 3, 15.2, payY - 3); // arrowhead side
+            // Stand neck
+            doc.setFillColor(200, 200, 200);
+            doc.rect(14, payY + 3.5, 2, 2, "F");
+            // Stand base
+            doc.rect(12, payY + 5.5, 6, 1, "F");
+            // Subtle reflection line under monitor
+            doc.setDrawColor(240, 240, 240);
+            doc.setLineWidth(1);
+            doc.line(9, payY + 7, 21, payY + 7);
+            
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "bold");
+            doc.text("Direct Deposit", 25, payY);
+            payY += 6;
+            
+            // Bank
+            doc.setFont("helvetica", "normal");
+            doc.text("Bank", 25, payY);
+            doc.setFont("helvetica", "bold");
+            doc.text("Virgin Business Banking", 45, payY);
+            payY += 4;
+            // Acc Name
+            doc.setFont("helvetica", "normal");
+            doc.text("Acc. Name", 25, payY);
+            doc.setFont("helvetica", "bold");
+            doc.text("Red 05 Ltd", 45, payY);
+            payY += 4;
+            // Sort Code
+            doc.setFont("helvetica", "normal");
+            doc.text("Sort Code", 25, payY);
+            doc.setFont("helvetica", "bold");
+            doc.text("82-61-37", 45, payY);
+            payY += 4;
+            // Acc No
+            doc.setFont("helvetica", "normal");
+            doc.text("Acc. No.", 25, payY);
+            doc.setFont("helvetica", "bold");
+            doc.text("30580090", 45, payY);
+            
+            // --- Right Column: Credit Card ---
+            let ccY = currentY + 30;
+            
+            // Credit Card Icon (Vector Graphic)
+            // Card body
+            doc.setDrawColor(180, 180, 180);
+            doc.setLineWidth(0.4);
+            doc.setFillColor(235, 235, 235);
+            doc.roundedRect(110, ccY - 5, 13, 8.5, 1.2, 1.2, "FD");
+            // Magnetic stripe (thick line across the top-ish)
+            doc.setFillColor(200, 200, 200);
+            doc.rect(110.2, ccY - 3.5, 12.6, 2.8, "F");
+            // Small chip / detail at the bottom right
+            doc.setFillColor(245, 245, 245);
+            doc.rect(119, ccY + 0.5, 2.5, 1.5, "F");
+            // Subtle reflection line under card
+            doc.setDrawColor(240, 240, 240);
+            doc.setLineWidth(1);
+            doc.line(110, ccY + 5, 123, ccY + 5);
+            
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "bold");
+            doc.text("Credit Card (MasterCard or Visa)", 128, ccY);
+            ccY += 6;
+            
+            doc.setFont("helvetica", "italic");
+            doc.text("Call", 128, ccY);
+            doc.setFont("helvetica", "normal");
+            doc.text("01273 525525", 136, ccY);
+            doc.setFont("helvetica", "italic");
+            doc.text("to pay over the phone.", 158, ccY);
+            
+            // Return as Blob instead of downloading
+            return doc.output("blob");
+        }
+
+        // ─── Initialization and Mock Data Simulation ──────────────────────────────
+        var mockData = {
+            "code": "success",
+            "message": "function executed successfully",
+            "details": {
+                "output_type": "string",
+                "id": "367979000000146003",
+                "output": {
+                    "Owner": {
+                        "name": "Parveen The Magician",
+                        "id": "816458000003560001",
+                        "email": "parvdevwad@gmail.com"
+                    },
+                    "$currency_symbol": "£",
+                    "Site_Name": "testing",
+                    "id": "816458000007892239",
+                    "Quote_Number": "816458000007892242",
+                    "Subject": "Test 12",
+                    "Quote_Stage": "To Be Completed",
+                    "Created_Time": "2026-04-07T08:50:57+01:00",
+                    "Modified_Time": "2026-04-07T13:10:06+01:00",
+                    "Valid_Till": "2026-04-08",
+                    "Grand_Total": 39.79,
+                    "Sub_Total": 39.79,
+                    "Discount": 0,
+                    "Adjustment": 0,
+                    "Contact_Name": {
+                        "name": "test test",
+                        "id": "816458000002767001"
+                    },
+                    "Quoted_Items": [
+                        {
+                            "Sequence_Number": "1",
+                            "Product_Name": {
+                                "name": "Eclipse Ball Bearing Grade 13 Butt Fire Door Hinge - 102 x 76 x 3mm - Satin Stainless - Pack of 3",
+                                "id": "816458000005985001",
+                                "Unit_Price": 15
+                            },
+                            "Quantity": 1,
+                            "Net_Total": 15,
+                            "Total": 15,
+                            "Block": "First Floor",
+                            "Location": "Plot1"
+                        },
+                        {
+                            "Sequence_Number": "2",
+                            "Product_Name": {
+                                "name": "180° Door Viewer - Door Thickness 35-55mm - 304 Satin Stainless Steel",
+                                "id": "816458000003389006",
+                                "Unit_Price": 16.84
+                            },
+                            "Quantity": 1,
+                            "Net_Total": 16.84,
+                            "Total": 16.84,
+                            "Block": "Second Floor",
+                            "Location": "Plot2"
+                        },
+                        {
+                            "Sequence_Number": "3",
+                            "Product_Name": {
+                                "name": "76mm Screw Fix Door Numeral - 2 - Satin Chrome",
+                                "id": "816458000002168097",
+                                "Unit_Price": 7.95
+                            },
+                            "Quantity": 1,
+                            "Net_Total": 7.95,
+                            "Total": 7.95,
+                            "Block": "First Floor",
+                            "Location": "Plot1"
+                        }
+                    ]
+                }
+            }
+        };
+
+        function processQuoteData(record) {
+            console.log("Processing Record:", record);
+
+            // ===== BASIC FIELDS =====
+            var contactName = record.Contact_Name ? record.Contact_Name.name : "";
+            var ownerName = record.Owner ? record.Owner.name : "";
+            var SiteName = record.Site_Name || "";
+
+            document.getElementById("subject").value = record.Subject || "";
+            document.getElementById("quote_number").value = record.Quote_Number || "";
+            document.getElementById("sales_person").value = ownerName;
+            document.getElementById("customer").value = contactName;
+            document.getElementById("due_date").value = record.Valid_Till || "";
+            document.getElementById("project_manager").value = ownerName;
+            document.getElementById("site").value = SiteName;
+
+            // ===== PRODUCTS =====
+            var products = record.Quoted_Items || [];
+            console.log("Products:", products);
+
+            // ===== AUTO FILL DATA (NO UI SWITCH) =====
+            var groupedData = {};
+            products.forEach(function (item) {
+                var productName = item.Product_Name ? item.Product_Name.name : "";
+                var qty = item.Quantity || 0;
+                var price = item.Product_Name ? (item.Product_Name.Unit_Price || 0) : 0;
+                var total = item.Total || (qty * price);
+                var location = item.Location || "No Plot";
+                var block = item.Block || "No Block";
+
+                if (!groupedData[block]) groupedData[block] = {};
+                if (!groupedData[block][location]) groupedData[block][location] = [];
+
+                groupedData[block][location].push({ productName, qty, price, total });
+            });
+
+            // Clean existing sections
+            document.getElementById("sections-container").innerHTML = '<div class="yellow-alert" id="no-sections-alert" style="margin-bottom:24px;"> <i class="fa-solid fa-triangle-exclamation"></i> No sections have been added yet. Create one above. </div>';
+            for (var key in plotDataMap) delete plotDataMap[key];
+
+            // ===== CREATE SECTIONS + DATA =====
+            Object.keys(groupedData).forEach(function (block) {
+                document.getElementById("new-section-name").value = block;
+                addSection();
+
+                var plotId = Object.keys(plotDataMap)[Object.keys(plotDataMap).length - 1];
+
+                Object.keys(groupedData[block]).forEach(function (location) {
+                    const locObj = {
+                        name: location,
+                        records: []
+                    };
+
+                    // Add Products
+                    groupedData[block][location].forEach(function (prod) {
+                        itemCount++;
+                        var itemId = `item-${itemCount}`;
+                        locObj.records.push({
+                            id: itemId,
+                            productName: prod.productName,
+                            qty: prod.qty,
+                            listPrice: prod.price,
+                            amount: prod.qty * prod.price,
+                            discount: 0,
+                            tax: 0,
+                            total: prod.total,
+                            locationName: location // Metadata for modal/sync
+                        });
+                    });
+
+                    plotDataMap[plotId].locations.push(locObj);
+                });
+
+                // ===== TOTAL CALCULATION =====
+                var subTotal = 0, taxTotal = 0, grandTotal = 0;
+                plotDataMap[plotId].locations.forEach(loc => {
+                    loc.records.forEach(function (r) {
+                        subTotal += r.amount;
+                        taxTotal += r.tax || 0;
+                        grandTotal += r.total;
+                    });
+                });
+
+                plotDataMap[plotId].subTotal = subTotal;
+                plotDataMap[plotId].taxTotal = taxTotal;
+                plotDataMap[plotId].grandTotal = grandTotal;
+
+                renderSectionProducts(plotId);
+            });
+        }
+
+
+        // Initialization and Simulation Trigger
+        var simulationTriggered = false;
+
+        function startSimulation() {
+            if (simulationTriggered) return;
+            simulationTriggered = true;
+            console.log("Triggering simulation with mock data...");
+            processQuoteData(mockData.details.output);
+        }
+
+        if (typeof ZOHO !== 'undefined') {
+            ZOHO.embeddedApp.on("PageLoad", function (data) {
+                var recordId = data.EntityId ? data.EntityId[0] : null;
+                console.log("Record ID from PageLoad:", recordId);
+                currentrecordid=recordId;
+                if (!recordId) {
+                    startSimulation();
+                } else {
+                    ZOHO.CRM.FUNCTIONS.execute("Fetch_Qoute", { "quote_id": recordId })
+                        .then(function (res) {
+                            var record = JSON.parse(res.details.output);
+                            processQuoteData(record);
+                            simulationTriggered = true; // Mark as done so fallback doesn't run
+                        }).catch(function (error) {
+                            console.error("Function Error:", error);
+                            startSimulation();
+                        });
+                }
+            });
+            ZOHO.embeddedApp.init();
+
+            // Fallback: If ZOHO init doesn't trigger PageLoad within 1.5s, run simulation
+            setTimeout(startSimulation, 1500);
+        } else {
+            // Standalone mode: trigger immediately on DOM ready
+            if (document.readyState === 'complete') {
+                startSimulation();
+            } else {
+                window.addEventListener('load', startSimulation);
+            }
+        }
+    </script>
+</body>
+
+</html>
