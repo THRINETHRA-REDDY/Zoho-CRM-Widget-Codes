@@ -1,0 +1,54 @@
+csvContent = "Last_Name\n";
+	newLine = hexToText("0A");
+s = list();
+s.add(1);
+s.add(2);
+for each i in s
+{
+csvContent = csvContent + "Last Name test\n"+newLine;
+
+}
+
+info "csvContent"+csvContent;
+csvFile = csvContent.toFile("Contacts.csv");
+zipFile = csvFile.compress("Contacts");
+
+info zipFile;
+
+newLine = hexToText("0A");
+
+message = "First Line" + newLine +
+          "Second Line" + newLine +
+          "Third Line";
+
+info message;
+filelist=List();
+
+newLine = hexToText("0A");
+message = "First Line" + newLine + "Second Line" + newLine + "Third Line";
+
+file = message.toFile("test.txt");
+
+info file;
+
+
+file.setparamname("file"); 
+resp = invokeurl 
+[ 
+    url: " https://www.zohoapis.in/crm/v2/files" 
+    type: POST 
+    files: file 
+    connection: "sendfileszfs" 
+]; 
+info resp;
+fileid = resp.getJSON("data").get(0).getJSON("details").getJSON("id"); 
+fmp = map(); 
+fmp.put("file_id",fileid); 
+filelist.add(fmp); 
+
+
+info filelist;
+mp = map(); 
+mp.put("File_Upload_3badh",filelist); 
+update = zoho.crm.updateRecord("Leads", 517970000024542010, mp);
+info update;
