@@ -1,0 +1,66 @@
+recordId=517970000023720224;
+
+    merchant = zoho.crm.v8.getRecordById("Subform_test", recordId);
+	
+	info merchant;
+	
+	email=merchant.get("Email");
+   
+    businessType = ifnull(merchant.get("Radio_Button_1"),""); 
+	info businessType;
+    
+    
+    // 3. Define the base Zoho Sign SignForm URL
+    baseUrl = "https://sign.zoho.in/zsfl/KCm0AHvWusEmeq2vJzKo?i=8137";
+    
+    
+    params = "&Radio=" + zoho.encryption.urlEncode(businessType);
+           
+    // The customer can continue adding the rest of their 50+ fields using the exact pattern above:
+    // + "&YourDataLabel=" + zoho.encryption.urlEncode(yourVariable)
+    
+    
+    finalSignUrl = baseUrl + params;
+	
+	info finalSignUrl;
+    
+//     sendmail
+//     [
+//         from: zoho.loginuserid
+//         to: email
+//         subject: "Your Merchant Services Application is Ready for Signature"
+//         message: "Hello Man,<br><br>Thank you for submitting your application. Please review and sign your agreement using the secure link below:<br><br><a href='" + finalSignUrl + "' style='background-color:#4CAF50;color:white;padding:10px 20px;text-decoration:none;display:inline-block;border-radius:4px;'>NRS pay Agreement</a><br><br>Thank you,<br>The NRS PAY Team"
+       
+//     ];
+    
+//     info "Email sent successfully with secure link.";
+	
+	
+	sendfrom = Map();
+sendfrom.put("email",zoho.loginuserid);
+sendto = Map();
+sendto.put("email",email);
+tolist = List();
+tolist.add(sendto);
+// tempmp = Map();
+// tempmp.put("id",17701000001054485);
+mp = Map();
+mp.put("from",sendfrom);
+mp.put("to",tolist);
+mp.put("content","Hello Man,<br><br>Thank you for submitting your application. Please review and sign your agreement using the secure link below:<br><br><a href='" + finalSignUrl + "' style='background-color:#4CAF50;color:white;padding:10px 20px;text-decoration:none;display:inline-block;border-radius:4px;'>NRS pay Agreement</a><br><br>Thank you,<br>The NRS PAY Team");
+mp.put("org_email",true);
+dlist = List();
+dlist.add(mp);
+data = Map();
+data.put("data",dlist);
+info data;
+sendmail1 = invokeurl
+[
+	url :"https://www.zohoapis.in/crm/v5/Subform_test/" + recordId + "/actions/send_mail"
+	type :POST
+	parameters:data + " "
+	connection:"sendmail"
+];
+info sendmail1;
+	
+	
