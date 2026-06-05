@@ -1,0 +1,60 @@
+// 	as=zoho.crm.getRecordById("Tasks", 517970000022415137);
+// 	info as;
+// 	info as.get("Due_Date");
+// entityMap = crmAPIRequest.toMap().get("record");
+// info entityMap;
+
+// Due = entityMap.get("Due_Date").toDate();
+
+// today = zoho.currentdate;
+// currentTime = zoho.currenttime.getTime(24);
+// info "currentTime"+currentTime;
+
+// cutOff = zoho.currentdate.toString("dd-MMM-yyyy") + " 16:45:00";
+// info "cutOff"+cutOff;
+// cutOffTime = cutOff.getTime(24);
+// info "cutOffTime"+cutOffTime;
+
+// response = Map();
+
+// if(Due == today && currentTime >= cutOffTime)
+// {
+//     response.put("status","error");
+//     response.put("message","Nach 16.45 können Tasks nur mit Fälligkeit am Folgetage erfasst werden. Bitte Fälligkeit auf den Folgetag legen.");
+// }
+// else
+// {
+//     response.put("status","success");
+// }
+
+// return response;
+// }
+
+
+
+
+
+// map validation_rule.FaelligkeitvonTask(String crmAPIRequest)
+// {
+// entityMap = crmAPIRequest.toMap().get("record");
+// info entityMap;
+// Due = entityMap.get("Due_Date").toDate();
+// info Due;
+// time = zoho.currenttime.toString("HH").toLong();
+// info time;
+// today = zoho.currentdate;
+// info today;
+// user = zoho.loginuserid;
+// info user;
+// response = Map();
+// if(Due == today && time >= 15.45)
+// {
+// response.put('status','error');
+// response.put('message','Nach 16.45 können Tasks nur mit Fälligkeit am Folgetage erfasst werden. Bitte Fälligkeit auf den Folgetag legen.');
+// }
+// else
+// {
+// response.put('status','success');
+// }
+// return response;
+// }
