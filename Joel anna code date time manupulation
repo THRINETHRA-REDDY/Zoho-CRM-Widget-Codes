@@ -1,0 +1,99 @@
+loop = {0,2,4};
+for each  ele in loop
+{
+	fromindex = ele * 1000;
+	queryMap = Map();
+	query = "select id,Created_Time from Leads where Last_Name is not null limit " + fromindex + ", 2000";
+	queryMap.put("select_query",query);
+	info "Fetching 2000 records starting at offset: " + fromindex;
+	coql_response = invokeurl
+	[
+		url :"https://www.zohoapis.in/crm/v8/coql"
+		type :POST
+		parameters:queryMap.toString()
+		connection:"xxx"
+	];
+	info coql_response;
+	array = coql_response.get("data");
+	info "array"+array;
+	list1=List();
+	for each  rec in array
+	{
+		id = rec.get("id");
+		date1=rec.get("Created_Time");
+		date2=zoho.currenttime;
+		mp = Map();
+		mp.put("id",rec.get("id"));
+
+// info bb;
+// as=date1.toDateTime("yyyy-MM-dd'T'HH:mm:ss+05:30").getHour();
+// info as;
+
+// upod=bb.toString()+"."+as;
+
+// upp=upod.toDecimal();
+
+// info upp;
+
+// total_hours = date1.hoursbetween(date2);
+
+// days = (total_hours / 24).floor();
+
+// remaining_hours = total_hours % 24;
+
+// age_value = (days.toString() + "." + remaining_hours.toString()).toDecimal();
+
+// info age_value;
+
+
+date2 = date2.toDateTime("dd-MMM-yyyy HH:mm:ss");
+
+date1 = date1.toDateTime("yyyy-MM-dd'T'HH:mm:ss+05:30");
+
+total_hours = date1.hoursbetween(date2);
+
+info total_hours;
+
+days = (total_hours / 24).floor();
+
+remaining_hours = total_hours % 24;
+
+if(remaining_hours < 10)
+{
+    remaining_hours = "0" + remaining_hours.toString();
+}
+else
+{
+    remaining_hours = remaining_hours.toString();
+}
+
+age_value = days.toString() + "." + remaining_hours;
+
+info age_value;
+
+mp.put("Age_bucket", age_value);
+		
+		list1.add(mp);
+		// 		update=zoho.crm.updateRecord("Tasks", id,{"Subject":"Updated via bulk"});
+	}
+	total_records = list1.size();
+	info total_records;
+	batch_steps = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
+	for each  step in batch_steps
+	{
+		start_idx = step * 100;
+		if(start_idx < total_records)
+		{
+			end_idx = start_idx + 100;
+			
+			if(end_idx > total_records)
+			{
+				end_idx = total_records;
+			}
+			batch = list1.subList(start_idx,end_idx);
+			// Execute the bulk update for this batch
+			update_resp = zoho.crm.bulkUpdate("Leads",batch);
+			info update_resp;
+		}
+	}
+}
