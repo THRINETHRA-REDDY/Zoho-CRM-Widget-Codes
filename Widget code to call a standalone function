@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Zoho Analytics Report</title>
+    <script src="https://live.zwidgets.com/js-sdk/1.1/ZohoEmbededAppSDK.min.js"></script>
+
+</head>
+<body>
+    <div id = "related-list"> Loading </div>
+    <script>
+        ZOHO.embeddedApp.on("PageLoad", function(data){
+            const recordId = data.EntityId; // current CRM record ID
+            const analyticsBaseUrl = "https://analytics.zoho.eu/open-view/297022000000321878?";
+            const filter = "ZOHO_CRITERIA=AccountID='" + recordId + "'";
+            const source = analyticsBaseUrl + filter;
+
+// let ddd='e736e4a2b0e306cae06ea1a45bcd5173421447d9760a59da0c5a6268054f22ebc9f562956dbef543167a96f2e717c5c37e8b4ec5f2d31d35d6c2cb9ba8682221a87c734f11d5d21b6ce31981f2c6a0a624eeb0fcdc6521fb24b098d98f97cf3acf630dda2ebd294802164bd0de40c3a7096f61017bed9040436f7d38424c8035cf62f116d1744c7613116f85be1f41b59b80ae9efee116a8dcb9ba5efd971d1791ce658789affaa8dc43a9fe158b2ffffd43c35ce7f2d3a3bca49c9a6bdb8e8a';
+
+// let conn_name="emails";
+// let url = 'https://www.zohoapis.in/crm/v8/Contacts/517970000023377487/Emails/actions/download_inline_images?message_id=4311490adf11e30439b9ffd5949c57a4608589225dab8c9dde6bdb60f3a1b1a6&user_id=517970000005425001&id='+ddd;
+
+// ZOHO.CRM.CONNECTION.invoke(conn_name, {
+//   method: "GET",
+//   url: url,
+//   param_type: 1
+// }).then(function (res) {
+//   console.log(res);
+// }).catch(err => {
+//   console.error("Inline image error:", err);
+// });
+
+
+
+var func_name = "widgetstandalonefunction";
+var req_data = {};
+ZOHO.CRM.FUNCTIONS.execute(func_name, req_data).then(function(data){
+	console.log("data",data)
+})
+            // const source = analyticsBaseUrl;
+            const dd = '<iframe frameborder=0 width="1550" height="480" src="' + source + '"> HI </iframe>';
+            document.getElementById("related-list").innerHTML = dd;
+        });
+        ZOHO.embeddedApp.init();
+    </script>
+</body>
+</html>
