@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CRM Lead To Creator</title>
+
+    <script src="https://live.zwidgets.com/js-sdk/1.5/ZohoEmbededAppSDK.min.js"></script>
+
+    <style>
+        body{
+            font-family: Arial;
+            padding:20px;
+            text-align:center;
+        }
+    </style>
+</head>
+
+<body>
+
+<h3>Opening Creator Form...</h3>
+<div id="status">Loading...</div>
+
+<script>
+
+ZOHO.embeddedApp.on("PageLoad", function(data){
+
+    var leadId = "";
+
+    if(data && data.EntityId){
+        leadId = String(data.EntityId).trim();
+    }
+
+    if(!leadId){
+        document.getElementById("status").innerHTML = "Lead ID not found.";
+        return;
+    }
+
+    document.getElementById("status").innerHTML = "Opening Creator Form...";
+
+    var creatorURL =
+        "https://creatorapp.zohopublic.in/jahnavimathurtechnologies/crm-implementation/form-perma/Leads_Details/f6vvsO5tGvp087U9W6U2wZPVJ4465gKKmQnjtpK7PPyZaHK01jTsFVjR0TdFb8hHbW7NH3WD4nOVpvn4CDbnrHKbzSB5Sz35MnPF?CRM_ID="
+        + encodeURIComponent(leadId);
+
+    var popup = window.open(
+        creatorURL,
+        "CreatorForm",
+        "width=700,height=650,left=300,top=100,scrollbars=yes,resizable=yes"
+    );
+
+    // Listen for success message from Creator
+    window.addEventListener("message", function(event){
+
+        if(event.data === "creatorSubmitted"){
+
+            try{
+                if(popup && !popup.closed){
+                    popup.close();
+                }
+            }catch(e){}
+
+            ZOHO.CRM.UI.Popup.close();
+        }
+
+    });
+
+});
+
+ZOHO.embeddedApp.init();
+
+</script>
+
+</body>
+</html>
