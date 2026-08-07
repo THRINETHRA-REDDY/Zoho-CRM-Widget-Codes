@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+    <meta charset="UTF-8">
+    <script src="https://live.zwidgets.com/js-sdk/1.5/ZohoEmbededAppSDK.min.js"></script>
+</head>
+
+
+<body style="margin:0">
+
+
+<div id="container"></div>
+
+
+<script>
+
+
+function closePopup() {
+    ZOHO.CRM.UI.Popup.close()
+        .then(function (data) {
+            console.log("Popup closed:", data);
+        })
+        .catch(function (err) {
+            console.error("Popup close failed:", err);
+        });
+}
+
+
+ZOHO.embeddedApp.on("PageLoad", function (data) {
+
+    console.log("testing");
+
+
+    var recordId = Array.isArray(data.EntityId)
+        ? data.EntityId[0]
+        : (data.EntityId || data.RecordID || data.recordId);
+
+
+    if (!recordId) return;
+
+    console.log("recordId",recordId);
+
+
+    ZOHO.CRM.API.getRecord({
+        Entity: "Sales_Orders",
+        RecordID: recordId
+    }).then(function (res) {
+
+
+        var rec = res.data[0];
+
+        console.log("rec",rec);
+
+        document.getElementById("container").innerHTML =
+    '<iframe ' +
+    'style="width:100%;height:100vh;border:0;" ' +
+    'src="https://creatorapp.zohopublic.in/bigcompany/name/form-embed/Test/b3bCqFEwRr6zYstkTCQhRpxJrWg7wp4UQnDZZ00debWTZSWz6EvtXH1TUfmzy7QCyNUB4dUj8kFq96E4H5pAyZBmPzzNYF3bPGAg">' +
+    '</iframe>';
+
+
+            window.addEventListener("message", function(event) {
+
+                console.log("event",event);
+
+if (event.data && event.data.action === "CREATOR_FORM_SUBMITTED") {
+    closePopup();
+}
+
+});
+
+        // TEST: Close the popup after 5 seconds
+        // setTimeout(function () {
+        //     closePopup();
+        // }, 5000);
+
+
+    });
+
+
+});
+
+
+ZOHO.embeddedApp.init();
+
+
+</script>
+
+
+</body>
+</html>
