@@ -1,0 +1,24 @@
+fileid="vpzd99d1431ac399a427a920ff8afe10b7380";
+mp = Map();
+mp.put("Accept","application/vnd.api+json");
+resp = invokeurl
+[
+    url: "https://workdrive.zoho.in/api/v1/files/" + fileid
+    type: GET
+    headers: mp
+    connection: "workdrive"
+];
+info resp;
+link = resp.get("data").get("attributes").get("permalink");
+
+info link;
+
+leadid=517970000027075019;
+update = invokeurl
+[
+    url: "https://www.zohoapis.in/crm/v8/Leads/" + leadid + "/Attachments?attachmentUrl=" + zoho.encryption.urlEncode(link) 
+    type: POST
+    connection : "hellokar"
+];
+
+info update;
