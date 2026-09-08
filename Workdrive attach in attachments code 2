@@ -1,0 +1,42 @@
+fileid="vpzd99d1431ac399a427a920ff8afe10b7380";
+mp = Map();
+mp.put("Accept","application/vnd.api+json");
+resp = invokeurl
+[
+    url: "https://workdrive.zoho.in/api/v1/files/" + fileid
+    type: GET
+    headers: mp
+    connection: "workdrive"
+];
+
+link = resp.get("data").get("attributes").get("permalink");
+fileName = resp.get("data").get("attributes").get("name");
+
+leadid = "517970000027229029";
+
+dataMap = Map();
+dataMap.put("$link_url", link);
+dataMap.put("File_Name", fileName);
+dataMap.put("$type", "teamdrive");
+
+dataList = List();
+dataList.add(dataMap);
+
+paramMap = Map();
+paramMap.put("data", dataList);
+
+payload = "attachments=" + zoho.encryption.urlEncode(paramMap.toString());
+
+headermap = Map();
+headermap.put("Content-Type", "application/x-www-form-urlencoded");
+
+update = invokeurl
+[
+    url: "https://www.zohoapis.in/crm/v8/Leads/" + leadid + "/Attachments" 
+    type: POST
+    headers: headermap
+    parameters: payload
+    connection : "hellokar"
+];
+
+info update;
