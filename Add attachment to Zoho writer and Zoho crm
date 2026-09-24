@@ -1,0 +1,118 @@
+string button.Add_BaasVeranda_Offerte_Pdf(String lid)
+{
+lead_details = zoho.crm.getRecordById("Leads",lid);
+info lead_details;
+leadname = lead_details.get("Full_Name");
+info ifnull(lead_details.get("Grand_Total"),"0").toNumber();
+rtn = "";
+if(ifnull(lead_details.get("Grand_Total"),"") != "")
+{
+	Gtotal = lead_details.get("Grand_Total").toDecimal();
+	discount = Gtotal;
+	vat = Gtotal;
+	ta = Gtotal;
+	tad = Gtotal;
+	document_id = "bc6ai4f6ceb6099c648f583b6c8d3025f8249";
+	// get_writer_fields = zoho.writer.getAllFields("mfe8w98a50773f9b8402ca842c776aff09dad","writer_con");
+	//  info get_writer_fields;
+	datamap = Map();
+	datamap.put("OFFERTENUMMER",lead_details.get("OFFERTENUMMER"));
+	datamap.put("Doc_Date",zoho.currentdate.toString("dd/MMM/yyyy"));
+	datamap.put("Full_Name",lead_details.get("Full_Name"));
+	datamap.put("First_Name",ifnull(lead_details.get("First_Name"),""));
+	item_list = List();
+	bfr_discountTotal = 0;
+	dis = 0;
+	ci = 0;
+	for each  item in lead_details.get("Items_Details")
+	{
+		item_map = Map();
+		item_map.put("Items_Details.Quantity",item.getJSON("Quantity"));
+		item_map.put("Items_Details.Aantal",item.getJSON("Aantal"));
+		item_map.put("Items_Details.Multi_Line",item.getJSON("Multi_Line"));
+		item_list.add(item_map);
+		if(ci == 0)
+		{
+			//calculation
+			bfr_discountTotal = ifnull(item.getJSON("Unit_Price"),0);
+			dis = dis + ifnull(item.getJSON("Discount"),0);
+			ci = 1;
+		}
+	}
+	vat = Gtotal / 100 * 21;
+	datamap.put("Items_Details",item_list);
+	//===================
+	Gtotal = lead_details.getJSON("Grand_Total_Round_Value");
+	Gtotal = Gtotal.toString("#,##0").replaceAll(",",".") + ",00";
+	datamap.put("Grand_Total",Gtotal);
+	temp_vat = lead_details.getJSON("VAT_21");
+	temp_vat = temp_vat.toString("#,##0").replaceAll(",",".") + ",00";
+	datamap.put("Vat",temp_vat);
+	temp_total_amount = lead_details.getJSON("Total_Amount");
+	temp_total_amount = temp_total_amount.toString("#,##0").replaceAll(",",".") + ",00";
+	//================
+	datamap.put("Total_without_VAT",lead_details.getJSON("Total_without_VAT"));
+	datamap.put("Total_Amount",temp_total_amount);
+	datamap.put("Discount",lead_details.getJSON("Discount"));
+	datamap.put("Total_Amount_Discount",Gtotal);
+	datamap.put("Grand_Total_Round_Value",lead_details.getJSON("Grand_Total_Round_Value"));
+	info lead_details.getJSON("Notes_Descriptions");
+	if(ifnull(lead_details.getJSON("Notes_Descriptions"),"") != "")
+	{
+		info lead_details.getJSON("Notes_Descriptions");
+		datamap.put("Notes_Descriptions",lead_details.getJSON("Notes_Descriptions"));
+	}
+	// 	outputsettings = Map();
+	// 	outputsettings.put("doc_name",leadname + " Offerte");
+	// 	outputsettings.put("format","pdf");
+	file_name = "Baasveranda - " + leadname + " - " + ifnull(lead_details.get("OFFERTENUMMER"),"");
+	param = Map();
+	param.put("merge_data",{"data":datamap});
+	param.put("output_settings",{"format":"pdf"});
+	param.put("filename",file_name);
+	param.put("response_type","link");
+	info param;
+	response = invokeurl
+	[
+		url :"https://www.zohoapis.eu/writer/api/v1/documents/" + document_id + "/merge"
+		type :POST
+		parameters:param
+		connection:"writer_con"
+	];
+	info response;
+	if(response.size() > 0)
+	{
+		durl = response.getJSON("URL");
+		info response;
+		get_file = invokeurl
+		[
+			url :durl
+			type :GET
+			connection:"writer_con"
+		];
+		info get_file;
+		get_file.setParamName("file");
+		response_file = invokeurl
+		[
+			url :"https://www.zohoapis.eu/crm/v8/Leads/" + lid + "/Attachments"
+			type :POST
+			files:get_file
+			connection:"writer_con"
+		];
+		info response_file;
+		if(ifnull(response_file.getJSON("data"),{}).size() > 0 && ifnull(response_file.getJSON("data").getJSON("code"),"") == "SUCCESS")
+		{
+			rtn = "Attachment Added sucessfully";
+		}
+		else
+		{
+			rtn = "Attachment Not Added Facing Error";
+		}
+	}
+}
+else
+{
+	rtn = "Please Check the Items and their Amount are Entered Correctly!";
+}
+return rtn;
+}
