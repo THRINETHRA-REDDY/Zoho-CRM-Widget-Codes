@@ -1,0 +1,34 @@
+ deal = zoho.crm.getRecordById("Deals", dealId);
+
+    stage = deal.get("Stage");
+
+    info "Deal Stage: " + stage;
+
+    connectedRecords = zoho.crm.getRelatedRecords("Connected_To__s", "Deals", dealId);
+
+    info connectedRecords;
+
+    statusValue = "";
+
+    if(stage == "Closed Won" || stage == "Quote Accepted" || stage == "Send Contracts")
+    {
+        statusValue = "Event Confirmed - Needs Details";
+    }
+    else if(stage == "Closed Lost")
+    {
+        statusValue = "Closed Lost";
+    }
+
+    if(statusValue != "")
+    {
+        for each rec in connectedRecords
+        {
+            update = zoho.crm.updateRecord(
+                "Pauls_Notes_Project",
+                rec.get("id"),
+                {"Status":statusValue}
+            );
+
+            info update;
+        }
+    }
