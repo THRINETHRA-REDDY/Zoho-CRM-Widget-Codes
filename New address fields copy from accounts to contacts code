@@ -1,0 +1,51 @@
+contactData = zoho.crm.getRecordById("Contacts", contactId);
+
+if(contactData.get("Account_Name") != null)
+{
+    accountId = contactData.get("Account_Name").get("id");
+    
+    accountResp = invokeurl
+    [
+        url: "https://www.zohoapis.com/crm/v8/Accounts/" + accountId
+        type: GET
+        connection:"xxxx"
+    ];
+
+    if(accountResp.get("data") != null && accountResp.get("data").size() > 0)
+    {
+        accountData = accountResp.get("data").get(0);
+        updateData = Map();
+        
+        updateData.put("Mailing_City", ifnull(accountData.get("Billing_City"), ""));
+        updateData.put("Mailing_Country", ifnull(accountData.get("Billing_Country"), ""));
+        updateData.put("Mailing_Flat_House_No_Building_Apartment_Name", ifnull(accountData.get("Billing_Flat_House_No_Building_Apartment_Name"), ""));
+        updateData.put("Mailing_Latitude", ifnull(accountData.get("Billing_Latitude"), ""));
+        updateData.put("Mailing_Longitude", ifnull(accountData.get("Billing_Longitude"), ""));
+        updateData.put("Mailing_State", ifnull(accountData.get("Billing_State"), ""));
+        updateData.put("Mailing_Street", ifnull(accountData.get("Billing_Street"), ""));
+        updateData.put("Mailing_Zip", ifnull(accountData.get("Billing_Code"), ""));
+        
+        updateData.put("Other_City", ifnull(accountData.get("Shipping_City"), ""));
+        updateData.put("Other_Country", ifnull(accountData.get("Shipping_Country"), ""));
+        updateData.put("Other_Flat_House_No_Building_Apartment_Name", ifnull(accountData.get("Shipping_Flat_House_No_Building_Apartment_Name"), ""));
+        updateData.put("Other_Latitude", ifnull(accountData.get("Shipping_Latitude"), ""));
+        updateData.put("Other_Longitude", ifnull(accountData.get("Shipping_Longitude"), ""));
+        updateData.put("Other_State", ifnull(accountData.get("Shipping_State"), ""));
+        updateData.put("Other_Street", ifnull(accountData.get("Shipping_Street"), ""));
+        updateData.put("Other_Zip", ifnull(accountData.get("Shipping_Code"), ""));
+        
+        payload = Map();
+        payload.put("data", {updateData});
+        
+        updateResp = invokeurl
+        [
+            url: "https://www.zohoapis.com/crm/v8/Contacts/" + contactId
+            type: PUT
+            parameters: payload.toString()
+            connection: "xxx"
+        ];
+        
+        info "Contact Address Updated: " + updateResp;
+    }
+
+}
