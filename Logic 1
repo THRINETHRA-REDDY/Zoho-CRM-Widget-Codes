@@ -1,0 +1,47 @@
+salesOrder = zoho.crm.v8.getRecordById("Sales_Orders",soid);
+items = salesOrder.get("Ordered_Items");
+
+vendorItems = Map();
+
+for each item in items
+{
+	product = zoho.crm.v8.getRecordById("Products",item.get("Product_Name").get("id"));
+	vendor = product.get("Proveeder");
+
+	if(vendor != null)
+	{
+		vendorId = vendor.get("id");
+
+		if(vendorItems.get(vendorId) == null)
+		{
+			vendorItems.put(vendorId,List());
+		}
+		
+		info vendorItems;
+
+		poItem = Map();
+		poItem.put("Product_Name",item.get("Product_Name").get("id"));
+		poItem.put("Quantity",item.get("Quantity"));
+		poItem.put("List_Price",product.get("Unit_Price"));
+
+		as=vendorItems.get(vendorId);
+		
+		as.add(poItem);
+		
+		
+	}
+}
+
+info vendorItems;
+for each vendorId in vendorItems.keys()
+{
+
+	poData = Map();
+	poData.put("Vendor_Name",vendorId);
+	poData.put("Purchase_Items",vendorItems.get(vendorId));
+	poData.put("Subject",salesOrder.get("Subject"));
+
+	response = zoho.crm.v8.createRecord("Purchase_Orders",poData);
+
+	info response;
+}
