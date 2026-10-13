@@ -1,0 +1,58 @@
+	as=zoho.crm.getRecordById("RGA",id);
+	
+	info as;
+	
+	attachementId=as.get("File_Upload_2").get(0).get("attachment_Id");
+	
+	
+	response = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v8/RGA/" + Did + "/Attachments/" + attachementId
+		type :GET
+		connection:"xxxx"
+	];
+	info response;
+	response.setParamName("file");
+	response = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v8/files"
+		type :POST
+		files:response
+		connection:"xxxx"
+	];
+	info response;
+	file12 = response.get("data").get(0).get("details").get("id");
+	info "file12" + file12;
+	filelist=List();
+		mp = Map();
+	mp.put("id",file12);
+	filelist.add(mp);
+	
+	
+	sendfrom = Map();
+sendfrom.put("email","customerservice@phillipsandtemro.com");
+sendto = Map();
+sendto.put("email",as.get("Email");
+tolist = List();
+tolist.add(sendto);
+tempmp = Map();
+tempmp.put("id",6096483000151973173);
+mp = Map();
+mp.put("from",sendfrom);
+mp.put("to",tolist);
+mp.put("template",tempmp);
+mp.put("attachments",filelist);
+mp.put("org_email",true);
+dlist = List();
+dlist.add(mp);
+data = Map();
+data.put("data",dlist);
+info data;
+sendmail1 = invokeurl
+[
+	url :"https://www.zohoapis.com/crm/v8/RGA/" + Did + "/actions/send_mail"
+	type :POST
+	parameters:data + " "
+	connection:"xxxx"
+];
+info sendmail1;
