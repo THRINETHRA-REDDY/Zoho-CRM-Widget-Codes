@@ -1,0 +1,18 @@
+entityMap = crmAPIRequest.toMap().get("record");
+accountName = entityMap.get("Account_Name");
+info "accountName" + accountName;
+response = Map();
+if(accountName != null && accountName != "")
+{
+	if(accountName != accountName.toUpperCase())
+	{
+		info "error";
+		response.put("status","error");
+		response.put("message","Please enter Account Name in uppercase letters.");
+	}
+	else
+	{
+		response.put("status","success");
+	}
+}
+return response;
