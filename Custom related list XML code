@@ -1,0 +1,292 @@
+
+source_module = "Deals";
+/*
+		CONSTANTS
+	*/
+BASE_URL = "https://crm.zoho.com/crm/org910194007/tab/";
+CONTACT_URL = BASE_URL + "Contacts/";
+LOCATIONS_URL = BASE_URL + "CustomModule1/";
+/*
+		VARIABLES
+	*/
+xml = "<record>";
+rowNo = 0;
+/*
+		Failsafe
+	*/
+if(id == null || id.trim() == "")
+{
+	return "<error><message>No contacts found.</message></error>";
+}
+/*
+		Load deal
+	*/
+record = zoho.crm.getRecordById(source_module,id.trim());
+if(record == null)
+{
+	return "<error><message>No contacts found.</message></error>";
+}
+/*
+		If Deal has Location populated, load that Location record
+	*/
+locationRec = null;
+locationLookup = record.get("Location");
+if(locationLookup != null)
+{
+	locationId = ifnull(locationLookup.get("id"),"");
+	if(locationId != "")
+	{
+		locationRec = zoho.crm.getRecordById("Locations",locationId);
+	}
+}
+/*
+		Helper: extract value from phonesJson string
+	*/
+homePhone = "";
+mobile = "";
+startIdx = 0;
+endIdx = 0;
+/*
+		Helper: build phone FL with tel: link, or blank space to avoid "No Value"
+	*/
+phoneFLHome = "";
+phoneFLMobile = "";
+/*
+		Row: Deal Contact
+	*/
+contactLookup = record.get("Contact_Name");
+if(contactLookup == null)
+{
+	return "<error><message>No contacts found.</message></error>";
+}
+contactName = ifnull(contactLookup.get("name"),"");
+contactId = ifnull(contactLookup.get("id"),"");
+if(contactId == "")
+{
+	return "<error><message>No contacts found.</message></error>";
+}
+phonesJson = standalone.getContactPhones(contactId);
+// Extract Home_Phone
+homePhone = "";
+if(phonesJson != null && phonesJson.contains("\"Home_Phone\":\""))
+{
+	startIdx = phonesJson.indexOf("\"Home_Phone\":\"") + "\"Home_Phone\":\"".length();
+	endIdx = phonesJson.indexOf("\"",startIdx);
+	if(endIdx > startIdx)
+	{
+		homePhone = phonesJson.subString(startIdx,endIdx);
+	}
+}
+// Extract Mobile
+mobile = "";
+if(phonesJson != null && phonesJson.contains("\"Mobile\":\""))
+{
+	startIdx = phonesJson.indexOf("\"Mobile\":\"") + "\"Mobile\":\"".length();
+	endIdx = phonesJson.indexOf("\"",startIdx);
+	if(endIdx > startIdx)
+	{
+		mobile = phonesJson.subString(startIdx,endIdx);
+	}
+}
+// Build Home Phone FL
+phoneFLHome = "<FL val=\"Home Phone\"> </FL>";
+if(homePhone != null && homePhone != "")
+{
+	homeDigits = homePhone.replaceAll("-","");
+	phoneFLHome = "<FL val=\"Home Phone\" link=\"true\" url=\"tel:" + homeDigits + "\">" + standalone.XMLEscape(homePhone) + "</FL>";
+}
+// Build Mobile FL
+phoneFLMobile = "<FL val=\"Mobile\"> </FL>";
+if(mobile != null && mobile != "")
+{
+	mobileDigits = mobile.replaceAll("-","");
+	phoneFLMobile = "<FL val=\"Mobile\" link=\"true\" url=\"tel:" + mobileDigits + "\">" + standalone.XMLEscape(mobile) + "</FL>";
+}
+rowNo = rowNo + 1;
+contactUrl = CONTACT_URL + contactId;
+xml = xml + "<row no=\"" + rowNo + "\">";
+xml = xml + "<FL val=\"Contact Name\" url=\"" + standalone.XMLEscape(contactUrl) + "\" link=\"true\">" + standalone.XMLEscape(contactName) + "</FL>";
+xml = xml + "<FL val=\"Role\">Deal Contact</FL>";
+xml = xml + phoneFLHome;
+xml = xml + phoneFLMobile;
+xml = xml + "</row>";
+/*
+		Location-derived contacts
+	*/
+if(locationRec != null)
+{
+	/*
+			Property Manager
+		*/
+	pmLookup = locationRec.get("Property_Manager");
+	if(pmLookup != null)
+	{
+		pmName = ifnull(pmLookup.get("name"),"");
+		pmId = ifnull(pmLookup.get("id"),"");
+		if(pmId != "")
+		{
+			phonesJson = standalone.getContactPhones(pmId);
+			homePhone = "";
+			if(phonesJson != null && phonesJson.contains("\"Home_Phone\":\""))
+			{
+				startIdx = phonesJson.indexOf("\"Home_Phone\":\"") + "\"Home_Phone\":\"".length();
+				endIdx = phonesJson.indexOf("\"",startIdx);
+				if(endIdx > startIdx)
+				{
+					homePhone = phonesJson.subString(startIdx,endIdx);
+				}
+			}
+			mobile = "";
+			if(phonesJson != null && phonesJson.contains("\"Mobile\":\""))
+			{
+				startIdx = phonesJson.indexOf("\"Mobile\":\"") + "\"Mobile\":\"".length();
+				endIdx = phonesJson.indexOf("\"",startIdx);
+				if(endIdx > startIdx)
+				{
+					mobile = phonesJson.subString(startIdx,endIdx);
+				}
+			}
+			phoneFLHome = "<FL val=\"Home Phone\"> </FL>";
+			if(homePhone != null && homePhone != "")
+			{
+				homeDigits = homePhone.replaceAll("-","");
+				phoneFLHome = "<FL val=\"Home Phone\" link=\"true\" url=\"tel:" + homeDigits + "\">" + standalone.XMLEscape(homePhone) + "</FL>";
+			}
+			phoneFLMobile = "<FL val=\"Mobile\"> </FL>";
+			if(mobile != null && mobile != "")
+			{
+				mobileDigits = mobile.replaceAll("-","");
+				phoneFLMobile = "<FL val=\"Mobile\" link=\"true\" url=\"tel:" + mobileDigits + "\">" + standalone.XMLEscape(mobile) + "</FL>";
+			}
+			rowNo = rowNo + 1;
+			pmUrl = CONTACT_URL + pmId;
+			xml = xml + "<row no=\"" + rowNo + "\">";
+			xml = xml + "<FL val=\"Contact Name\" url=\"" + standalone.XMLEscape(pmUrl) + "\" link=\"true\">" + standalone.XMLEscape(pmName) + "</FL>";
+			xml = xml + "<FL val=\"Role\">Property Manager</FL>";
+			xml = xml + phoneFLHome;
+			xml = xml + phoneFLMobile;
+			xml = xml + "</row>";
+		}
+	}
+	/*
+			Designer
+		*/
+	designerLookup = locationRec.get("Designer");
+	if(designerLookup != null)
+	{
+		designerName = ifnull(designerLookup.get("name"),"");
+		designerId = ifnull(designerLookup.get("id"),"");
+		if(designerId != "")
+		{
+			phonesJson = standalone.getContactPhones(designerId);
+			homePhone = "";
+			if(phonesJson != null && phonesJson.contains("\"Home_Phone\":\""))
+			{
+				startIdx = phonesJson.indexOf("\"Home_Phone\":\"") + "\"Home_Phone\":\"".length();
+				endIdx = phonesJson.indexOf("\"",startIdx);
+				if(endIdx > startIdx)
+				{
+					homePhone = phonesJson.subString(startIdx,endIdx);
+				}
+			}
+			mobile = "";
+			if(phonesJson != null && phonesJson.contains("\"Mobile\":\""))
+			{
+				startIdx = phonesJson.indexOf("\"Mobile\":\"") + "\"Mobile\":\"".length();
+				endIdx = phonesJson.indexOf("\"",startIdx);
+				if(endIdx > startIdx)
+				{
+					mobile = phonesJson.subString(startIdx,endIdx);
+				}
+			}
+			phoneFLHome = "<FL val=\"Home Phone\"> </FL>";
+			if(homePhone != null && homePhone != "")
+			{
+				homeDigits = homePhone.replaceAll("-","");
+				phoneFLHome = "<FL val=\"Home Phone\" link=\"true\" url=\"tel:" + homeDigits + "\">" + standalone.XMLEscape(homePhone) + "</FL>";
+			}
+			phoneFLMobile = "<FL val=\"Mobile\"> </FL>";
+			if(mobile != null && mobile != "")
+			{
+				mobileDigits = mobile.replaceAll("-","");
+				phoneFLMobile = "<FL val=\"Mobile\" link=\"true\" url=\"tel:" + mobileDigits + "\">" + standalone.XMLEscape(mobile) + "</FL>";
+			}
+			rowNo = rowNo + 1;
+			designerUrl = CONTACT_URL + designerId;
+			xml = xml + "<row no=\"" + rowNo + "\">";
+			xml = xml + "<FL val=\"Contact Name\" url=\"" + standalone.XMLEscape(designerUrl) + "\" link=\"true\">" + standalone.XMLEscape(designerName) + "</FL>";
+			xml = xml + "<FL val=\"Role\">Designer</FL>";
+			xml = xml + phoneFLHome;
+			xml = xml + phoneFLMobile;
+			xml = xml + "</row>";
+		}
+	}
+	/*
+			Other Contact (Role from Other_Contact_Role or blank)
+		*/
+	otherLookup = locationRec.get("Other_Contact");
+	if(otherLookup != null)
+	{
+		otherName = ifnull(otherLookup.get("name"),"");
+		otherId = ifnull(otherLookup.get("id"),"");
+		if(otherId != "")
+		{
+			otherRole = ifnull(locationRec.get("Other_Contact_Role"),"");
+			if(otherRole == null)
+			{
+				otherRole = "";
+			}
+			phonesJson = standalone.getContactPhones(otherId);
+			homePhone = "";
+			if(phonesJson != null && phonesJson.contains("\"Home_Phone\":\""))
+			{
+				startIdx = phonesJson.indexOf("\"Home_Phone\":\"") + "\"Home_Phone\":\"".length();
+				endIdx = phonesJson.indexOf("\"",startIdx);
+				if(endIdx > startIdx)
+				{
+					homePhone = phonesJson.subString(startIdx,endIdx);
+				}
+			}
+			mobile = "";
+			if(phonesJson != null && phonesJson.contains("\"Mobile\":\""))
+			{
+				startIdx = phonesJson.indexOf("\"Mobile\":\"") + "\"Mobile\":\"".length();
+				endIdx = phonesJson.indexOf("\"",startIdx);
+				if(endIdx > startIdx)
+				{
+					mobile = phonesJson.subString(startIdx,endIdx);
+				}
+			}
+			phoneFLHome = "<FL val=\"Home Phone\"> </FL>";
+			if(homePhone != null && homePhone != "")
+			{
+				homeDigits = homePhone.replaceAll("-","");
+				phoneFLHome = "<FL val=\"Home Phone\" link=\"true\" url=\"tel:" + homeDigits + "\">" + standalone.XMLEscape(homePhone) + "</FL>";
+			}
+			phoneFLMobile = "<FL val=\"Mobile\"> </FL>";
+			if(mobile != null && mobile != "")
+			{
+				mobileDigits = mobile.replaceAll("-","");
+				phoneFLMobile = "<FL val=\"Mobile\" link=\"true\" url=\"tel:" + mobileDigits + "\">" + standalone.XMLEscape(mobile) + "</FL>";
+			}
+			rowNo = rowNo + 1;
+			otherUrl = CONTACT_URL + otherId;
+			xml = xml + "<row no=\"" + rowNo + "\">";
+			xml = xml + "<FL val=\"Contact Name\" url=\"" + standalone.XMLEscape(otherUrl) + "\" link=\"true\">" + standalone.XMLEscape(otherName) + "</FL>";
+			xml = xml + "<FL val=\"Role\">" + standalone.XMLEscape(otherRole) + "</FL>";
+			xml = xml + phoneFLHome;
+			xml = xml + phoneFLMobile;
+			xml = xml + "</row>";
+		}
+	}
+}
+
+if(rowNo > 0)
+{
+	xml = xml + "</record>";
+	return xml;
+}
+else
+{
+	return "<error><message>No additional contacts found.</message></error>";
+}
