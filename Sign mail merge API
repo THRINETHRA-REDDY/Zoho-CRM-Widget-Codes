@@ -1,0 +1,48 @@
+string button.SendChangeOrder(String Qid,String Email,String Name)
+{
+if(!Email.isNull())
+{
+	Quote = zoho.crm.getRecordById("Quotes",Qid);
+	OwnEmail = Quote.get("Owner").get("email");
+	mmt = Map();
+	mmt.put("mail_merge_template",{"name":"Change Order"});
+	mmt.put("file_name","Paradise remodeling contract");
+	signlist = list();
+	signmap = Map();
+	signmap.put("recipient_name",Name);
+	signmap.put("action_type","sign");
+	signmap.put("recipient",{"type":"email","value":Email});
+	signmap2 = Map();
+	signmap2.put("recipient_name",Quote.get("Owner").get("name"));
+	signmap2.put("action_type","sign");
+	signmap2.put("recipient",{"type":"email","value":OwnEmail});
+	signlist.add(signmap);
+	signlist.add(signmap2);
+	mmt.put("signers",signlist);
+	Sign = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v8/Quotes/" + Qid + "/actions/sign_mail_merge"
+		type :POST
+		parameters:{"sign_mail_merge":{mmt}} + " "
+		connection:"sendcontract"
+	];
+	info Sign;
+	if(!Sign.isNull())
+	{
+		signid = Sign.get("sign_mail_merge").get(0).get("details").get("sign_resource_id");
+		if(signid)
+		{
+			return "Document sent for signature successfully";
+		}
+	}
+	else
+	{
+		return "Unexpected error occured, check logs";
+	}
+}
+else
+{
+	return "No email available for the associated contact, add email and try again";
+}
+return "";
+}
