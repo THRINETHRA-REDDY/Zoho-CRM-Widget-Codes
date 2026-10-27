@@ -1,0 +1,39 @@
+module_api_name = "Leads";
+target_field_api_name = "Lead_Status"; // Replace with your target field's API name
+
+// Define the endpoint URL
+endpoint = "https://www.zohoapis.in/crm/v8/settings/fields?module=" + module_api_name;
+
+// Execute the API call
+response = invokeurl
+[
+    url : endpoint
+    type : GET
+    connection : "hellokar"
+];
+
+// Parse the response to extract the specific field's ID and its picklist values
+if(response.containKey("fields"))
+{
+    fields_list = response.get("fields");
+    for each field in fields_list
+    {
+        if(field.get("api_name") == target_field_api_name)
+        {
+            info "Field ID: " + field.get("id");
+            info "--- Picklist Options ---";
+            
+            if(field.containKey("pick_list_values"))
+            {
+                picklist_options = field.get("pick_list_values");
+                for each option in picklist_options
+                {
+                    info "Display Value: " + option.get("display_value");
+                    info "Option ID: " + option.get("id");
+                    info "Reference Value: " + option.get("reference_value");
+                    info "------------------------";
+                }
+            }
+        }
+    }
+}
