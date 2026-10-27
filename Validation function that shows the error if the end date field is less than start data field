@@ -1,0 +1,28 @@
+                                        */  
+entityMap = crmAPIRequest.toMap().get("record");
+entityMap=zoho.crm.getRecordById("Calibration",517970000028215108);
+info "Entity Map: " + entityMap;
+startDate = entityMap.get("Start_Date_Time");
+endDate = entityMap.get("End_Date_Time");
+response = Map();
+if(!startDate.isNull() && !endDate.isNull())
+{
+    startDate = startDate.replaceAll("T"," ").remove("+05:30").toDateTime();
+	info startDate;
+    endDate = endDate.replaceAll("T"," ").remove("+05:30").toDateTime();
+	info endDate;
+    if(endDate < startDate)
+    {
+        response.put("status","Failed");
+        response.put("message","End Date/Time cannot be earlier than Start Date/Time.");
+    }
+    else
+    {
+        response.put("status","success");
+    }
+}
+else
+{
+    response.put("status","success");
+}
+return response;
