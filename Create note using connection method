@@ -1,0 +1,18 @@
+note1 = Map();
+
+ef = ab + " " + cd;
+info ef;
+note1.put("Note_Content",ef);
+note1.put("Parent_Id",{"module":{"api_name":"Tasks"},"id":recid});
+dataList = List();
+dataList.add(note1);
+params = Map();
+params.put("data",dataList);
+response = invokeurl
+[
+	url :"https://www.zohoapis.in/crm/v8/Notes"
+	type :POST
+	parameters:params.toString()
+	connection:"hellokar"
+];
+info response;
