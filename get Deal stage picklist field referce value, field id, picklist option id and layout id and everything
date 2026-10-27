@@ -1,0 +1,58 @@
+module_api_name = "Deals";
+
+// Define the endpoint URL
+endpoint = "https://www.zohoapis.in/crm/v8/settings/layouts?module=" + module_api_name;
+
+// Execute the API call
+response = invokeurl
+[
+    url : endpoint
+    type : GET
+    connection : "hellokar"
+];
+
+// Parse the response to extract Layout ID, Section Name, and Stage picklist values
+if(response.containKey("layouts"))
+{
+    layouts_list = response.get("layouts");
+    for each layout in layouts_list
+    {
+        info "Layout Name: " + layout.get("name");
+        info "Layout ID: " + layout.get("id");
+        
+        if(layout.containKey("sections"))
+        {
+            sections_list = layout.get("sections");
+            for each section in sections_list
+            {
+                if(section.containKey("fields"))
+                {
+                    fields_list = section.get("fields");
+                    for each field in fields_list
+                    {
+                        // Target the Stage field
+                        if(field.get("api_name") == "Stage")
+                        {
+                            info "--- Found Stage Field ---";
+                            info "Section Name: " + section.get("name");
+                            info "Field ID: " + field.get("id");
+                            
+                            if(field.containKey("pick_list_values"))
+                            {
+                                picklist_options = field.get("pick_list_values");
+                                for each option in picklist_options
+                                {
+                                    info "Display Value: " + option.get("display_value");
+                                    info "Option ID: " + option.get("id");
+                                    info "Reference Value: " + option.get("reference_value");
+                                }
+                            }
+                            info "-------------------------";
+                        }
+                    }
+                }
+            }
+        }
+        info "=========================";
+    }
+}
