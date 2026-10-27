@@ -1,0 +1,39 @@
+module_api_name = "Leads";
+field_id = "517970000000000887";
+
+// Construct the picklist value map
+picklist_value = Map();
+picklist_value.put("id", "517970000000011325");
+picklist_value.put("display_value", "Contacted");
+picklist_value.put("reference_value", "maycontact");
+
+// Add to a list (since pick_list_values is an array)
+pick_list_values_list = List();
+pick_list_values_list.add(picklist_value);
+
+// Construct the field map
+field_map = Map();
+field_map.put("pick_list_values", pick_list_values_list);
+
+// Add to the fields list
+fields_list = List();
+fields_list.add(field_map);
+
+// Construct the final payload map
+payload = Map();
+payload.put("fields", fields_list);
+
+// Define the endpoint URL
+endpoint = "https://www.zohoapis.in/crm/v8/settings/fields/" + field_id + "?module=" + module_api_name;
+
+// Execute the API call
+response = invokeurl
+[
+    url : endpoint
+    type : PATCH
+    parameters : payload.toString()
+    headers : {"Content-Type":"application/json"}
+    connection : "hellokar"
+];
+
+info response;
