@@ -1,0 +1,56 @@
+layout_id = "517970000002935014";
+module_api_name = "Deals";
+
+// 1. Construct the picklist option mapping
+picklist_value = Map();
+picklist_value.put("id", "517970000000000245");
+picklist_value.put("display_value", "Qualification"); 
+picklist_value.put("reference_value", "Qual_Ref_Value"); 
+
+pick_list_values_list = List();
+pick_list_values_list.add(picklist_value);
+
+// 2. Map the field (Updated with id and data_type)
+field_map = Map();
+field_map.put("id", "517970000000000807"); // Required field identifier
+field_map.put("data_type", "picklist"); // Satisfies the new validation
+field_map.put("api_name", "Stage");
+field_map.put("field_label", "Stage"); 
+field_map.put("pick_list_values", pick_list_values_list);
+
+fields_list = List();
+fields_list.add(field_map);
+
+// 3. Map the section 
+section_map = Map();
+// section_map.put("id", "YOUR_SECTION_ID_HERE"); // Recommended to use explicit ID here as well
+section_map.put("display_label", "Deal Information"); 
+section_map.put("name", "Deal Information"); 
+section_map.put("fields", fields_list);
+
+sections_list = List();
+sections_list.add(section_map);
+
+// 4. Construct the layout payload
+layout_map = Map();
+layout_map.put("sections", sections_list);
+
+layouts_list = List();
+layouts_list.add(layout_map);
+
+payload = Map();
+payload.put("layouts", layouts_list);
+
+// 5. Define endpoint & execute
+endpoint = "https://www.zohoapis.in/crm/v8/settings/layouts/" + layout_id + "?module=" + module_api_name;
+
+response = invokeurl
+[
+    url : endpoint
+    type : PATCH
+    parameters : payload.toString()
+    headers : {"Content-Type":"application/json"}
+    connection : "hellokar"
+];
+
+info response;
