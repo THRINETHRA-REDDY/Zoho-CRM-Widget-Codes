@@ -1,0 +1,329 @@
+leadIdLong = input.leadId.toLong();
+
+leadDetails = zoho.crm.getRecordById("Leads", leadIdLong);
+
+AcccountMap = map();
+
+AcccountMap.put(("Account_Name"), ifnull(leadDetails.get("Company"),""));
+
+AcccountMap.put("Annual_Revenue", ifnull(leadDetails.get("Annual_Revenue"),""));
+
+AcccountMap.put("Billing_City", ifnull(leadDetails.get("City"),""));
+
+AcccountMap.put("Billing_Country", ifnull(leadDetails.get("Country"),""));
+
+AcccountMap.put("Description", ifnull(leadDetails.get("Description"),""));
+
+AcccountMap.put("Fax", ifnull(leadDetails.get("Fax"),""));
+
+AcccountMap.put("Industry", ifnull(leadDetails.get("Industry"),""));
+
+AcccountMap.put("Employees", ifnull(leadDetails.get("No_of_Employees"),""));
+
+AcccountMap.put("Phone", ifnull(leadDetails.get("Phone"),""));
+
+AcccountMap.put("Rating", ifnull(leadDetails.get("Rating"),""));
+
+AcccountMap.put("Billing_State", ifnull(leadDetails.get("State"),""));
+
+AcccountMap.put("Billing_Street", ifnull(leadDetails.get("Street"),""));
+
+AcccountMap.put("Billing_Code", ifnull(leadDetails.get("Zip_Code"),""));
+
+AcccountMap.put("Website", ifnull(leadDetails.get("Website"),""));
+
+AccountCreate = zoho.crm.create(("Accounts"), AcccountMap);
+
+info AccountCreate;
+
+newaccountId = AccountCreate.get("id");
+
+ContactMap = map();
+
+ContactMap.put("First_Name", ifnull(leadDetails.get("First_Name"),""));
+
+ContactMap.put("Last_Name", ifnull(leadDetails.get("Last_Name"),""));
+
+ContactMap.put("Mailing_City", ifnull(leadDetails.get("City"),""));
+
+ContactMap.put("Mailing_Country", ifnull(leadDetails.get("Country"),""));
+
+ContactMap.put("Mailing_State", ifnull(leadDetails.get("State"),""));
+
+ContactMap.put("Mailing_Street", ifnull(leadDetails.get("Street"),""));
+
+ContactMap.put("Mailing_Zip", ifnull(leadDetails.get("Zip_Code"),""));
+
+ContactMap.put("Description", ifnull(leadDetails.get("Description"),""));
+
+ContactMap.put("Fax", ifnull(leadDetails.get("Fax"),""));
+
+ContactMap.put("Title", ifnull(leadDetails.get("Title"),""));
+
+ContactMap.put("Email", ifnull(leadDetails.get("Email"),""));
+
+ContactMap.put("Lead_Source", ifnull(leadDetails.get("Lead_Source"),""));
+
+ContactMap.put("Mobile", ifnull(leadDetails.get("Mobile"),""));
+
+ContactMap.put("Phone", ifnull(leadDetails.get("Phone"),""));
+
+ContactMap.put("Secondary_Email", ifnull(leadDetails.get("Secondary_Email"),""));
+
+ContactMap.put("Skype_ID", ifnull(leadDetails.get("Skype_ID"),""));
+
+ContactMap.put("Twitter", ifnull(leadDetails.get("Twitter"),""));
+
+ContactMap.put("Account_Name", newaccountId);
+
+ContactCreate = zoho.crm.create("Contacts", ContactMap);
+
+info ContactCreate;
+
+newcontactId = ContactCreate.get("id");
+
+PotentialMap = map();
+
+PotentialMap.put("Deal_Name", ifnull(leadDetails.get("Full_Name"),""));
+
+PotentialMap.put("City", ifnull(leadDetails.get("City"),""));
+
+PotentialMap.put("Country", ifnull(leadDetails.get("Country"),""));
+
+PotentialMap.put("State", ifnull(leadDetails.get("State"),""));
+
+PotentialMap.put("Street", ifnull(leadDetails.get("Street"),""));
+
+PotentialMap.put("Zipcode", ifnull(leadDetails.get("Zip_Code"),""));
+
+PotentialMap.put("Description", ifnull(leadDetails.get("Description"),""));
+
+PotentialMap.put("Lead_Source", ifnull(leadDetails.get("Lead_Source"),""));
+
+PotentialMap.put("Account_Name",newaccountId );
+
+PotentialMap.put("Contact_Name",newcontactId );
+
+PotentialCreate = zoho.crm.create("Potentials", PotentialMap);
+
+info PotentialCreate;
+
+newdealId = PotentialCreate.get("id");
+
+// Copy Related notes
+
+RelatedNotes = zoho.crm.getRelatedRecords("Notes", "Leads", leadIdLong);
+
+for each note in RelatedNotes
+
+{
+
+notemap = Map();
+
+notemap.put("Parent_Id",newcontactId);
+
+notemap.put("Note_Content",note.get("Note_Content"));
+
+notemap.put("Note_Title",ifnull(note.get("Note_Title"),""));
+
+notemap.put("se_module","Contacts");
+
+notecreate = zoho.crm.create("Notes",notemap);
+
+notemap1 = Map();
+
+notemap1.put("Parent_Id",newaccountId);
+
+notemap1.put("Note_Content",note.get("Note_Content"));
+
+notemap1.put("Note_Title",ifnull(note.get("Note_Title"),""));
+
+notemap1.put("se_module","Accounts");
+
+notecreate1 = zoho.crm.create("Notes",notemap1);
+
+notemap2 = Map();
+
+notemap2.put("Parent_Id",newdealId);
+
+notemap2.put("Note_Content",note.get("Note_Content"));
+
+notemap2.put("Note_Title",ifnull(note.get("Note_Title"),""));
+
+notemap2.put("se_module","Deals");
+
+notecreate2 = zoho.crm.create("Notes",notemap2);
+
+}
+
+// Copy activties
+
+reltasks = zoho.crm.getRelatedRecords("Tasks","Leads",leadIdLong);
+
+for each task in reltasks
+
+{
+
+taskmap = Map();
+
+taskmap.put("What_Id",newaccountId);
+
+taskmap.put("$se_module","Accounts");
+
+taskmap.put("Who_Id",newcontactId);
+
+updatetask = zoho.crm.update("Tasks",task.get("id"),taskmap);
+
+info updatetask;
+
+}
+
+relevents = zoho.crm.getRelatedRecords("Events","Leads",leadIdLong);
+
+for each events in relevents
+
+{
+
+eventmap = Map();
+
+eventmap.put("What_Id",newaccountId);
+
+eventmap.put("$se_module","Accounts");
+
+eventmap.put("Who_Id",newcontactId);
+
+updateevent = zoho.crm.update("Events",events.get("id"),eventmap);
+
+info updateevent;
+
+}
+
+relcalls = zoho.crm.getRelatedRecords("Calls","Leads",leadIdLong);
+
+for each call in relcalls
+
+{
+
+callmap = Map();
+
+callmap.put("What_Id",newaccountId);
+
+callmap.put("$se_module","Accounts");
+
+callmap.put("Who_Id",newcontactId);
+
+updatecall = zoho.crm.update("Calls",call.get("id"),callmap);
+
+info updatecall;
+
+}
+
+// Copy Attachment
+
+relatedrcords = zoho.crm.getRelatedRecords("Attachments","Leads",leadIdLong);
+
+attachid = List();
+
+for each ele in relatedrcords
+
+{
+
+attachementId = ele.get("id");
+
+attachid.add(attachementId);
+
+}
+
+for each ele in attachid
+
+{
+
+downloadFile = invokeurl
+
+[
+
+url: "https://www.zohoapis.com/crm/v2/Leads/" + leadId + "/Attachments/" + ele
+
+type: GET
+
+connection : "customfunction"
+
+];
+
+resp = zoho.crm.attachFile("Contacts",newcontactId,downloadFile);
+
+info resp;
+
+resp1 = zoho.crm.attachFile("Accounts",newaccountId,downloadFile);
+
+info resp1;
+
+resp2 = zoho.crm.attachFile("Deals",newdealId,downloadFile);
+
+info resp2;
+
+}
+
+// Copy related list
+
+relateddetails = zoho.crm.getRelatedRecords("Client_Products","Leads",leadIdLong);
+
+for each record in relateddetails
+
+{
+
+updatemap = Map();
+
+updatemap.put("xxxxxx",newcontactId);
+
+updatemap.put("yyyyyyy",newaccountId);
+
+updatemap.put("zzzzzzzzz",newdealId);
+
+custoomupdate = zoho.crm.updateRecord("customname", record.get("id"), updatemap);
+
+info custoomupdate;
+
+}
+
+return "success";
+
+
+
+4. Click on ‘Edit Arguments'
+
+a) Choose lead id - name it as 'leadId' and save
+
+5. Click on Save and save the button.
+
+
+
+Replace 'customname' with the api name of that custom module.
+
+Replace 'xxxxxx' with the contact lookup field api name in that custom module.
+
+Replace 'yyyyyyy' with the account lookup field api name in that custom module.
+
+Replace 'zzzzzzzzz' with the deal lookup field api name in that custom module.
+
+Replace 'customfunction' with the connection name.
+
+
+Steps to create connections:
+
+1) Navigate to Settings --> Developer Space --> Connections
+
+2) Click " Add Connection"
+
+3) Choose Zoho OAuth
+
+4) Choose all the scope for ZohoCRM
+
+5) Click " Create and Connect"
+
+6) Click " Connect" and click " Agree"
+
+Write to us for any further clarifications.
+
+TY
+tyag
