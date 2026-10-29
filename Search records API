@@ -1,0 +1,60 @@
+
+void automation.UpdateStudentModule(String recid)
+{
+    getCCRecord = invokeurl
+    [
+        url :"https://www.zohoapis.com/crm/v8/College_Counseling/" + recid + "?fields=Cumulative_Unweighted_GPA,Cumulative_Weighted,NSHE_Core_GPA,Composite_ACT_Score,SAT_Score,Pell_Award_Amount,Student"
+        type :GET
+        connection:"crm"
+    ];
+
+    info getCCRecord;
+
+    records = getCCRecord.get("data");
+
+    if(records != null && records.size() > 0)
+    {
+        recData = records.get(0);
+        studentLookup = recData.get("Student");
+
+        if(studentLookup != null && studentLookup.get("id") != null)
+        {
+            studentId = studentLookup.get("id");
+            data = Map();
+
+            if(recData.get("Cumulative_Unweighted_GPA") != null)
+            {
+                data.put("Cumulative_Unweighted_GPA", recData.get("Cumulative_Unweighted_GPA"));
+            }
+
+            if(recData.get("NSHE_Core_GPA") != null)
+            {
+                data.put("NSHE_Core_GPA", recData.get("NSHE_Core_GPA"));
+            }
+
+            if(recData.get("Cumulative_Weighted") != null)
+            {
+                data.put("Cumulative_Weighted", recData.get("Cumulative_Weighted"));
+            }
+
+            if(recData.get("Composite_ACT_Score") != null)
+            {
+                data.put("Composite_ACT_Score", recData.get("Composite_ACT_Score"));
+            }
+
+            if(recData.get("SAT_Score") != null)
+            {
+                data.put("SAT_Score", recData.get("SAT_Score"));
+            }
+
+            if(recData.get("Pell_Award_Amount") != null)
+            {
+                data.put("Pell_Grant_Award_Amount", recData.get("Pell_Award_Amount"));
+            }
+
+                crmUpdate = zoho.crm.updateRecord("Contacts", studentId, data);
+                info crmUpdate;
+          
+        }
+    }
+}
