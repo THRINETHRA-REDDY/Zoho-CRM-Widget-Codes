@@ -1,0 +1,30 @@
+ 
+fieldResponse = invokeurl
+[
+    url : "https://www.zohoapis.in/crm/v8/settings/fields?module=Leads"
+    type : GET
+    connection : "hellokar"
+];
+
+fields = fieldResponse.get("fields");
+
+for each field in fields
+{
+    if(field.get("api_name") == "Lead_Status")
+    {
+        info "Lead Status Field ID:";
+        info field.get("id");
+
+        info "Available Picklist Values:";
+
+        picklistValues = field.get("pick_list_values");
+
+        for each option in picklistValues
+        {
+            info "Value: " + option.get("display_value");
+            info "Actual Value: " + option.get("actual_value");
+            info "Picklist ID: " + option.get("id");
+            info "-------------------------";
+        }
+    }
+}
