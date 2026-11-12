@@ -1,0 +1,394 @@
+void automation.sg()
+{
+	
+	
+// =============================================
+// CONFIGURATION - REPLACE WITH YOUR CRM IDs
+// =============================================
+
+moduleId = "517970000000000037";
+layoutId = "517970000000000167";
+fieldId = "517970000000000887";
+
+// Picklist option IDs from Lead Status field
+newPicklistId = "517970000000011343";
+qualifiedPicklistId = "517970000000011337";
+convertedPicklistId = "517970000000011325";
+
+moduleAPI = "Leads";
+layoutAPI = "Standard__s";
+fieldAPI = "Lead_Status";
+
+// =============================================
+// STATES
+// =============================================
+
+states = List();
+
+s1 = Map();
+s1.put("name", "New");
+s1.put("api_name", "State_New");
+
+pick1 = Map();
+pick1.put("id", newPicklistId);
+pick1.put("actual_value", "New");
+s1.put("pick_list_value", pick1);
+
+mod1 = Map();
+mod1.put("api_name", moduleAPI);
+mod1.put("id", moduleId);
+s1.put("module", mod1);
+
+states.add(s1);
+
+
+s2 = Map();
+s2.put("name", "Qualified");
+s2.put("api_name", "State_Qualified");
+
+pick2 = Map();
+pick2.put("id", qualifiedPicklistId);
+pick2.put("actual_value", "Qualified");
+s2.put("pick_list_value", pick2);
+
+mod2 = Map();
+mod2.put("api_name", moduleAPI);
+mod2.put("id", moduleId);
+s2.put("module", mod2);
+
+states.add(s2);
+
+
+s3 = Map();
+s3.put("name", "Converted");
+s3.put("api_name", "State_Converted");
+
+pick3 = Map();
+pick3.put("id", convertedPicklistId);
+pick3.put("actual_value", "Converted");
+s3.put("pick_list_value", pick3);
+
+mod3 = Map();
+mod3.put("api_name", moduleAPI);
+mod3.put("id", moduleId);
+s3.put("module", mod3);
+
+states.add(s3);
+
+
+// =============================================
+// TRANSITIONS
+// =============================================
+
+transitions = List();
+
+t1 = Map();
+t1.put("name", "Qualify Lead");
+t1.put("api_name", "Transition_Qualify");
+t1.put("trigger_type", "manual");
+t1.put("transition_type", "standalone_transition");
+t1.put("common", false);
+
+tm1 = Map();
+tm1.put("api_name", moduleAPI);
+tm1.put("id", moduleId);
+t1.put("module", tm1);
+
+tl1 = Map();
+tl1.put("api_name", layoutAPI);
+tl1.put("name", "Standard");
+tl1.put("id", layoutId);
+t1.put("layout", tl1);
+
+transitions.add(t1);
+
+
+t2 = Map();
+t2.put("name", "Convert Lead");
+t2.put("api_name", "Transition_Convert");
+t2.put("trigger_type", "manual");
+t2.put("transition_type", "standalone_transition");
+t2.put("common", false);
+
+tm2 = Map();
+tm2.put("api_name", moduleAPI);
+tm2.put("id", moduleId);
+t2.put("module", tm2);
+
+tl2 = Map();
+tl2.put("api_name", layoutAPI);
+tl2.put("name", "Standard");
+tl2.put("id", layoutId);
+t2.put("layout", tl2);
+
+transitions.add(t2);
+
+
+// =============================================
+// LOGICAL CONNECTIONS
+// =============================================
+
+connections = List();
+
+c1 = Map();
+c1.put("api_name", "Connection_1");
+
+from1 = Map();
+from1.put("api_name", "State_New");
+from1.put("name", "New");
+c1.put("from_state", from1);
+
+to1 = Map();
+to1.put("api_name", "State_Qualified");
+to1.put("name", "Qualified");
+c1.put("to_state", to1);
+
+trans1 = Map();
+trans1.put("api_name", "Transition_Qualify");
+trans1.put("name", "Qualify Lead");
+trans1.put("precedence", 1);
+c1.put("transitions", trans1);
+
+connections.add(c1);
+
+
+c2 = Map();
+c2.put("api_name", "Connection_2");
+
+from2 = Map();
+from2.put("api_name", "State_Qualified");
+from2.put("name", "Qualified");
+c2.put("from_state", from2);
+
+to2 = Map();
+to2.put("api_name", "State_Converted");
+to2.put("name", "Converted");
+c2.put("to_state", to2);
+
+trans2 = Map();
+trans2.put("api_name", "Transition_Convert");
+trans2.put("name", "Convert Lead");
+trans2.put("precedence", 1);
+c2.put("transitions", trans2);
+
+connections.add(c2);
+
+
+// =============================================
+// CHART DATA - VISUAL EDITOR NODES
+// =============================================
+
+chartNodes = List();
+
+n1 = Map();
+n1.put("position_x", 100);
+n1.put("position_y", 200);
+
+ns1 = Map();
+ns1.put("api_name", "State_New");
+n1.put("state", ns1);
+
+chartNodes.add(n1);
+
+
+n2 = Map();
+n2.put("position_x", 400);
+n2.put("position_y", 200);
+
+ns2 = Map();
+ns2.put("api_name", "State_Qualified");
+n2.put("state", ns2);
+
+chartNodes.add(n2);
+
+
+n3 = Map();
+n3.put("position_x", 700);
+n3.put("position_y", 200);
+
+ns3 = Map();
+ns3.put("api_name", "State_Converted");
+n3.put("state", ns3);
+
+chartNodes.add(n3);
+
+
+// =============================================
+// CHART DATA - VISUAL CONNECTIONS
+// =============================================
+
+chartConnections = List();
+
+cc1 = Map();
+cc1.put("api_name", "Connection_1");
+
+cf1 = Map();
+
+cf1state = Map();
+cf1state.put("api_name", "State_New");
+cf1.put("state", cf1state);
+
+cf1end = Map();
+cf1end.put("position_x", 200);
+cf1end.put("position_y", 200);
+cf1end.put("direction_x", 1);
+cf1end.put("direction_y", 0);
+cf1.put("end_point", cf1end);
+
+cc1.put("from", cf1);
+
+
+ct1 = Map();
+
+ct1state = Map();
+ct1state.put("api_name", "State_Qualified");
+ct1.put("state", ct1state);
+
+ct1end = Map();
+ct1end.put("position_x", 400);
+ct1end.put("position_y", 200);
+ct1end.put("direction_x", -1);
+ct1end.put("direction_y", 0);
+ct1.put("end_point", ct1end);
+
+cc1.put("to", ct1);
+
+ctr1 = Map();
+ctr1.put("api_name", "Transition_Qualify");
+ctr1.put("name", "Qualify Lead");
+cc1.put("transition", ctr1);
+
+chartConnections.add(cc1);
+
+
+cc2 = Map();
+cc2.put("api_name", "Connection_2");
+
+cf2 = Map();
+
+cf2state = Map();
+cf2state.put("api_name", "State_Qualified");
+cf2.put("state", cf2state);
+
+cf2end = Map();
+cf2end.put("position_x", 500);
+cf2end.put("position_y", 200);
+cf2end.put("direction_x", 1);
+cf2end.put("direction_y", 0);
+cf2.put("end_point", cf2end);
+
+cc2.put("from", cf2);
+
+
+ct2 = Map();
+
+ct2state = Map();
+ct2state.put("api_name", "State_Converted");
+ct2.put("state", ct2state);
+
+ct2end = Map();
+ct2end.put("position_x", 700);
+ct2end.put("position_y", 200);
+ct2end.put("direction_x", -1);
+ct2end.put("direction_y", 0);
+ct2.put("end_point", ct2end);
+
+cc2.put("to", ct2);
+
+ctr2 = Map();
+ctr2.put("api_name", "Transition_Convert");
+ctr2.put("name", "Convert Lead");
+cc2.put("transition", ctr2);
+
+chartConnections.add(cc2);
+
+
+// =============================================
+// CHART DATA OBJECT
+// =============================================
+
+chartData = Map();
+chartData.put("nodes", chartNodes);
+
+canvasSize = Map();
+canvasSize.put("width", 1000);
+canvasSize.put("height", 600);
+
+chartData.put("canvas_size", canvasSize);
+chartData.put("connections", chartConnections);
+
+
+// =============================================
+// BLUEPRINT CONFIGURATION
+// =============================================
+
+blueprint = Map();
+
+blueprint.put("name", "API Blueprint Test");
+blueprint.put("api_name", "API_Blueprint_Test");
+blueprint.put("description", "Testing API-created Blueprint rendering");
+
+blueprint.put("continuous", false);
+
+module = Map();
+module.put("api_name", moduleAPI);
+module.put("id", moduleId);
+module.put("precedence", 1);
+
+blueprint.put("module", module);
+
+layout = Map();
+layout.put("api_name", layoutAPI);
+layout.put("name", "Standard");
+layout.put("id", layoutId);
+
+blueprint.put("layout", layout);
+
+field = Map();
+field.put("api_name", fieldAPI);
+field.put("field_label", "Lead Status");
+field.put("id", fieldId);
+
+blueprint.put("field", field);
+
+blueprint.put("states", states);
+blueprint.put("transitions", transitions);
+blueprint.put("connections", connections);
+blueprint.put("chart_data", chartData);
+
+
+// =============================================
+// ROOT LEVEL BLUEPRINTS ARRAY
+// =============================================
+
+blueprints = List();
+blueprints.add(blueprint);
+
+requestBody = Map();
+requestBody.put("blueprints", blueprints);
+
+
+// =============================================
+// CREATE BLUEPRINT API
+// =============================================
+
+headers = Map();
+headers.put("Content-Type", "application/json");
+
+response = invokeurl
+[
+    url : "https://www.zohoapis.in/crm/v8/settings/blueprints"
+    type : POST
+    body : requestBody.toString()
+    headers : headers
+    connection : "hellokar"
+];
+
+info "CREATE BLUEPRINT RESPONSE";
+info response;
+
+
+	
+	
+
+}
