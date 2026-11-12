@@ -1,0 +1,17 @@
+// 3. Get all Leads fields
+Leads = invokeurl
+[
+    url : baseURL + "/settings/fields?module=Leads"
+    type : GET
+    connection : "hellokar"
+];
+
+ 
+fields = Leads.get("fields");
+ for each field in fields
+ {
+ if(field.get("api_name")== "Lead_Status")
+ {
+ info field.get("id");
+ }
+ }
