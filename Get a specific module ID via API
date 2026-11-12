@@ -1,0 +1,12 @@
+baseURL = "https://www.zohoapis.in/crm/v8";
+
+// 1. Get Leads module metadata
+moduleResponse = invokeurl
+[
+    url : baseURL + "/settings/modules/Leads"
+    type : GET
+    connection : "hellokar"
+];
+
+info "========== MODULE DETAILS ==========";
+info moduleResponse;
