@@ -1,0 +1,68 @@
+	leadId="517970000029271005";
+	
+    primaryNotes = zoho.crm.getRelatedRecords("Notes", "Leads", leadId);
+    primaryNotesContent = List();
+    
+    for each pNote in primaryNotes
+    {
+        if(pNote.get("Note_Content") != null)
+        {
+            primaryNotesContent.add(pNote.get("Note_Content"));
+        }
+    }
+
+	results=["1"];
+    for each rec in results
+    {
+        recId = "517970000028785002";
+        if(recId != leadId)
+        {
+            // Associate the records
+//             up = zoho.crm.updateRecord("Leads", recId, {"Primary_Contact": leadId});
+            
+            // 2. Fetch notes from the related Lead
+            relatedNotes = zoho.crm.getRelatedRecords("Notes", "Leads", recId);
+            relatedNotesContent = List();
+            
+            // 3. Sync Related Lead notes to Primary Lead
+            for each rNote in relatedNotes
+            {
+                content = rNote.get("Note_Content");
+                if(content != null)
+                {
+                    relatedNotesContent.add(content);
+                    // Check if note already exists on the Primary Lead to avoid duplicates
+                    if(!primaryNotesContent.contains(content))
+                    {
+                        noteMap = Map();
+                        noteMap.put("Note_Title", ifnull(rNote.get("Note_Title"),""));
+                        noteMap.put("Note_Content", content);
+                        noteMap.put("Parent_Id", leadId);
+                        noteMap.put("se_module", "Leads");
+                        zoho.crm.createRecord("Notes", noteMap);
+                        
+                        // Add to primary list so it isn't duplicated in future iterations
+                        primaryNotesContent.add(content);
+                    }
+                }
+            }
+            
+            // 4. Sync Primary Lead notes to Related Lead
+            for each pNote in primaryNotes
+            {
+                content = pNote.get("Note_Content");
+                if(content != null && !relatedNotesContent.contains(content))
+                {
+                    noteMap = Map();
+                    noteMap.put("Note_Title", ifnull(pNote.get("Note_Title"),""));
+                    noteMap.put("Note_Content", content);
+                    noteMap.put("Parent_Id", recId);
+                    noteMap.put("se_module", "Leads");
+                    zoho.crm.createRecord("Notes", noteMap);
+                    
+                    // Add to related list
+                    relatedNotesContent.add(content);
+                }
+            }
+        }
+    }
