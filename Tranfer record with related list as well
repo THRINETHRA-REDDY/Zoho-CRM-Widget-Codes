@@ -1,0 +1,123 @@
+dealerDetails = zoho.crm.getRecordById("Dealer_Enrollments", dealerId);
+
+mp = Map();
+mp.put("Account_Name", ifnull(dealerDetails.get("Name"), ""));
+mp.put("DealerName", ifnull(dealerDetails.get("DBA_Name"), ""));
+mp.put("Email_Address", ifnull(dealerDetails.get("Email"), ""));
+mp.put("Phone", ifnull(dealerDetails.get("Company_Phone"), ""));
+mp.put("Owner", ifnull(dealerDetails.get("Owner"), "").get("id"));
+mp.put("Program_Name", ifnull(dealerDetails.get("Program_Name"), ""));
+mp.put("Wish_Dealer_ID", ifnull(dealerDetails.get("SEU_DealerID"), ""));
+mp.put("IWS_Enrollment", ifnull(dealerDetails.get("Online_Enrollment_Completed"), false));
+mp.put("Address1", ifnull(dealerDetails.get("Physical_Address"), ""));
+mp.put("Dealer_Address2", ifnull(dealerDetails.get("Apt_Suite_Building"), ""));
+mp.put("City", ifnull(dealerDetails.get("City"), ""));
+mp.put("Dealer_State1", ifnull(dealerDetails.get("State"), ""));
+mp.put("Zip", ifnull(dealerDetails.get("Zip_Postal"), ""));
+mp.put("Contact_Name", ifnull(dealerDetails.get("Primary_Contact_Name"), ""));
+mp.put("Phone_2", ifnull(dealerDetails.get("Primary_Contact_Phone"), ""));
+mp.put("Dealer_Email_2", ifnull(dealerDetails.get("Primary_Contact_Email"), ""));
+mp.put("Sales_Contact", ifnull(dealerDetails.get("Secondary_Contact_Name"), ""));
+mp.put("Mobile", ifnull(dealerDetails.get("Secondary_Contact_Phone"), ""));
+mp.put("Dealer_Email2", ifnull(dealerDetails.get("Secondary_Contact_Email"), ""));
+mp.put("Sales_Contact2", ifnull(dealerDetails.get("Add_Contact_Name_2"), ""));
+mp.put("Mobile_2", ifnull(dealerDetails.get("Phone_4"), ""));
+mp.put("Add_Contact_Email_2", ifnull(dealerDetails.get("Add_Contact_Email_2"), ""));
+mp.put("Tax_Identification_Number_EIN", ifnull(dealerDetails.get("Tax_Identification_Number_EIN"), ""));
+mp.put("Certificate_of_Insurance", ifnull(dealerDetails.get("Certificate_of_Insurance"), ""));
+mp.put("License", ifnull(dealerDetails.get("License"), ""));
+mp.put("ClientDealerId", ifnull(dealerDetails.get("Client_Dealer_Id"), ""));
+
+bdmList = dealerDetails.get("BDM_Working_with");
+if(bdmList != null && bdmList.size() > 0)
+{
+    mp.put("Ownership", bdmList.get(0));
+}
+
+// Tags
+tags = dealerDetails.get("Tag");
+if(tags != null && tags.size() > 0)
+{
+    tagList = List();
+    for each t in tags
+    {
+        tMap = Map();
+        tMap.put("name", t.get("name"));
+        tagList.add(tMap);
+    }
+    mp.put("Tag", tagList);
+}
+
+create = zoho.crm.createRecord("Accounts", mp);
+info mp;
+info create;
+
+// Convert Vendor_Type into a Note on the new Account
+vendorType = ifnull(dealerDetails.get("Vendor_Type"), "");
+if(vendorType != "")
+{
+    vtNoteMap = Map();
+    vtNoteMap.put("Note_Title", "Vendor Type");
+    vtNoteMap.put("Note_Content", "Vendor Type: " + vendorType);
+    vtNoteMap.put("Parent_Id", create.get("id"));
+    vtNoteMap.put("$se_module", "Accounts");
+    createVtNote = zoho.crm.createRecord("Notes", vtNoteMap);
+    info createVtNote;
+}
+
+// Transfer Tasks
+reltasks = zoho.crm.getRelatedRecords("Tasks", "Dealer_Enrollments", dealerId, 1, 200);
+if(reltasks.size() > 0)
+{
+    for each task in reltasks
+    {
+        taskmap = Map();
+        taskmap.put("What_Id", create.get("id"));
+        taskmap.put("$se_module", "Accounts");
+        updatetask = zoho.crm.updateRecord("Tasks", task.get("id"), taskmap);
+        info updatetask;
+    }
+}
+
+relevents = zoho.crm.getRelatedRecords("Events", "Dealer_Enrollments", dealerId, 1, 200);
+if(relevents.size() > 0)
+{
+    for each events in relevents
+    {
+        eventmap = Map();
+        eventmap.put("What_Id", create.get("id"));
+        eventmap.put("$se_module", "Accounts");
+        updateevent = zoho.crm.updateRecord("Events", events.get("id"), eventmap);
+        info updateevent;
+    }
+}
+
+relcalls = zoho.crm.getRelatedRecords("Calls", "Dealer_Enrollments", dealerId, 1, 200);
+if(relcalls.size() > 0)
+{
+    for each call in relcalls
+    {
+        callmap = Map();
+        callmap.put("What_Id", create.get("id"));
+        callmap.put("$se_module", "Accounts");
+        updatecall = zoho.crm.updateRecord("Calls", call.get("id"), callmap);
+        info updatecall;
+    }
+}
+
+relnotes = zoho.crm.getRelatedRecords("Notes", "Dealer_Enrollments", dealerId, 1, 200);
+if(relnotes.size() > 0)
+{
+    for each note in relnotes
+    {
+        notemap = Map();
+        notemap.put("Note_Title", ifnull(note.get("Note_Title"), ""));
+        notemap.put("Note_Content", ifnull(note.get("Note_Content"), ""));
+        notemap.put("Parent_Id", create.get("id"));
+        notemap.put("$se_module", "Accounts");
+        createnote = zoho.crm.createRecord("Notes", notemap);
+        info createnote;
+    }
+}
+
+return "Account created and related records transferred successfully.";
