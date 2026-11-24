@@ -1,0 +1,34 @@
+crm_contact = zoho.crm.getRecordById("Contacts",contactid);
+email = crm_contact.get("Email");
+if(email == null || email == "")
+{
+	return "No email address found for this contact.";
+}
+
+camp_response = invokeurl
+[
+	url :"https://campaigns.zoho.com/api/v1.1/getContactDetails?resfmt=JSON&emailid=" + zoho.encryption.urlEncode(email)
+	type :GET
+	connection:"xxxx"
+];
+
+contact_id = "";
+if(camp_response.containKey("contact_details"))
+{
+	contact_details = camp_response.get("contact_details");
+	if(contact_details.containKey("basic"))
+	{
+		basic_details = contact_details.get("basic");
+		contact_id = basic_details.get("contact_id");
+	}
+}
+if(contact_id == null || contact_id == "")
+{
+	return "Could not locate this contact's ID in Zoho Campaigns.";
+}
+
+org_id = "yyyyy";
+campaigns_url = "https://campaigns.zoho.com/campaigns/org" + org_id + "/home.do#subscribers/all/" + contact_id + "/c_fullview";
+info campaigns_url;
+openUrl(campaigns_url,"new window");
+return "Opening Campaigns profile...";
